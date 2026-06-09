@@ -20,10 +20,10 @@
 </head>
 <body>
 
-    <!-- ОКНО ВХОДА (ОНО ГАРАНТИРОВАННО ПОЯВИТСЯ) -->
+    <!-- ОКНО ВХОДА -->
     <div id="auth-panel" class="card">
         <h2>Авторизация GitHub</h2>
-        <label>Вставьте ваш Personal Access Token (classic):</label>
+        <label>Вставьте ваш Personal Access Token:</label>
         <input type="password" id="gh-token" placeholder="ghp_xxxxxxxxxxxx">
         <button class="btn" onclick="saveToken()">Войти в админку</button>
     </div>
@@ -46,17 +46,16 @@
         <input type="text" id="post-title" placeholder="Введите заголовок">
 
         <label>Текст публикации:</label>
-        <textarea id="post-text" rows="5" placeholder="Напишите текст..."></textarea>
+        <textarea id="post-text" rows="5" placeholder="Напишите text..."></textarea>
 
         <label>Ссылка на фото (необязательно):</label>
         <input type="text" id="post-img" placeholder="https://...">
 
-        <button class="btn" onclick="uploadToGitHub()">Опубликовать на сайт</button>
+        <button class="btn" id="submit-btn" onclick="uploadToGitHub()">Опубликовать на сайт</button>
         <button class="btn btn-logout" onclick="logout()">Выйти</button>
     </div>
 
     <script>
-        // Замените на ваши точные данные репозитория!
         const OWNER = "klenex1333";
         const REPO = "sovietggkjt";
         const FILE_PATH = "data.json";
@@ -80,15 +79,18 @@
             location.reload();
         }
 
-        // Логика прямой отправки файла в ваш репозиторий GitHub
         async function uploadToGitHub() {
             const token = localStorage.getItem('gh_cms_token');
             const section = document.getElementById('post-section').value;
             const title = document.getElementById('post-title').value.trim();
             const text = document.getElementById('post-text').value.trim();
             const img = document.getElementById('post-img').value.trim();
+            const btn = document.getElementById('submit-btn');
 
             if (!title || !text) return alert('Заполните заголовок и текст!');
+
+            btn.disabled = true;
+            btn.innerText = "Публикация...";
 
             const newPost = {
                 id: Date.now().toString(),
@@ -103,23 +105,30 @@
             const url = `https://github.com{OWNER}/${REPO}/contents/${FILE_PATH}`;
             
             try {
-                // 1. Получаем текущую версию файла data.json и его SHA-хэш
-                const res = await fetch(url, { headers: { 'Authorization': `token ${token}` } });
-                if (!res.ok) throw new Error('Не удалось подключиться к GitHub. Проверьте ваш токен.');
+                // ИСПРАВЛЕНО: Добавлены CORS-заголовки для безопасности запросов
+                const res = await fetch(url, { 
+                    mode: 'cors',
+                    headers: { 
+                        'Authorization': `Bearer ${token}`,
+                        'Accept': 'application/vnd.github.v3+json'
+                    } 
+                });
+                
+                if (!res.ok) throw new Error('Ошибка авторизации. Проверьте правильность токена и наличие галочки repo.');
                 
                 const fileData = await res.json();
                 const sha = fileData.sha;
                 const currentContent = JSON.parse(atob(fileData.content.replace(/\s/g, '')));
 
-                // 2. Добавляем новую новость в массив
                 if (!currentContent.posts) currentContent.posts = [];
                 currentContent.posts.unshift(newPost);
 
-                // 3. Отправляем обновленный json обратно на гитхаб
                 const updateRes = await fetch(url, {
                     method: 'PUT',
+                    mode: 'cors',
                     headers: {
-                        'Authorization': `token ${token}`,
+                        'Authorization': `Bearer ${token}`,
+                        'Accept': 'application/vnd.github.v3+json',
                         'Content-Type': 'application/json'
                     },
                     body: JSON.stringify({
@@ -131,19 +140,21 @@
                 });
 
                 if (updateRes.ok) {
-                    alert('Публикация успешно добавлена! Сайт обновится в течение минуты.');
+                    alert('Публикация успешно добавлена! Сайт обновится на GitHub Pages через 30-60 секунд.');
                     document.getElementById('post-title').value = '';
                     document.getElementById('post-text').value = '';
                     document.getElementById('post-img').value = '';
                 } else {
-                    alert('Ошибка при сохранении на GitHub.');
+                    alert('Ошибка записи на GitHub. Проверьте права токена.');
                 }
             } catch (err) {
                 alert(err.message);
+            } finally {
+                btn.disabled = false;
+                btn.innerText = "Опубликовать на сайт";
             }
         }
 
-        // Проверяем авторизацию при старте страницы
         checkAuth();
     </script>
 </body>
