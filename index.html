@@ -3,137 +3,157 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Вход в систему управления МС</title>
-    <style>
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: system-ui, sans-serif; }
-        body { background-color: #0f172a; color: #f8fafc; display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 1.5rem; }
-        .card { background: #1e293b; padding: 2.5rem; border-radius: 16px; box-shadow: 0 15px 30px rgba(0,0,0,0.4); max-width: 450px; width: 100%; border: 1px solid rgba(255,255,255,0.05); }
-        h2 { font-size: 1.75rem; font-weight: 800; margin-bottom: 1.5rem; text-align: center; color: #fff; }
-        label { display: block; font-size: 0.875rem; font-weight: 600; color: #94a3b8; margin-bottom: 0.5rem; }
-        input, textarea, select { width: 100%; padding: 0.75rem 1rem; background: #0f172a; border: 1px solid #334155; border-radius: 8px; color: #fff; font-size: 0.95rem; margin-bottom: 1.25rem; transition: all 0.3s; }
-        input:focus, textarea:focus, select:focus { outline: none; border-color: #2563eb; box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.2); }
-        .btn { width: 100%; padding: 0.9rem; background: linear-gradient(135deg, #2563eb, #1d4ed8); color: #fff; border: none; border-radius: 8px; font-weight: 700; font-size: 1rem; cursor: pointer; transition: all 0.3s; box-shadow: 0 4px 12px rgba(37,99,235,0.3); }
-        .btn:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(37,99,235,0.4); }
-        .btn-logout { background: #334155; margin-top: 0.75rem; box-shadow: none; }
-        .btn-logout:hover { background: #475569; box-shadow: none; }
-        .hint { font-size: 0.8rem; color: #64748b; margin-top: 1rem; text-align: center; }
-    </style>
+    <title>Молодёжный Совет ГГКЖТ</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cloudflare.com">
 </head>
 <body>
+    <!-- ИСПРАВЛЕНО: Логотип и огромный текст строго по центру -->
+    <header style="display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 2rem 1rem; background-color: #1e293b; position: relative; width: 100%; box-shadow: 0 4px 10px rgba(0,0,0,0.3);">
+        <div class="logo-container" style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1.5rem; width: 100%; margin-bottom: 1.5rem;">
+            <!-- Логотип прямоугольный с аккуратным скруглением -->
+            <img src="logo.png" alt="Логотип ГГКЖТ" class="logo-img" style="width: 120px; height: auto; border-radius: 8px; object-fit: contain;">
+            <!-- Огромный шрифт названия по центру -->
+            <h1 style="font-size: 3rem; font-weight: 800; color: #ffffff; margin: 0; line-height: 1.2; letter-spacing: -0.03em; width: 100%;">Молодёжный Совет ГГКЖТ</h1>
+        </div>
+        <nav style="width: 100%; display: flex; justify-content: center;">
+            <ul style="display: flex; list-style: none; gap: 1.5rem; padding: 0; margin: 0; flex-wrap: wrap; justify-content: center;">
+                <li><a href="#about" style="color: #fff; text-decoration: none; font-size: 1.1rem;">О нас</a></li>
+                <li><a href="#sectors" style="color: #fff; text-decoration: none; font-size: 1.1rem;">Сектора</a></li>
+                <li><a href="#news" style="color: #fff; text-decoration: none; font-size: 1.1rem;">Новости</a></li>
+                <li><a href="#contact" style="color: #fff; text-decoration: none; font-size: 1.1rem;">Контакты</a></li>
+            </ul>
+        </nav>
+    </header>
 
-    <!-- БЛОК СЕКРЕТНОГО ПАРОЛЯ -->
-    <div id="auth-panel" class="card">
-        <h2>Доступ ограничен</h2>
-        <label>Введите пин-код администратора:</label>
-        <input type="password" id="admin-pin" placeholder="****" autofocus>
-        <button class="btn" onclick="checkPin()">Войти</button>
-        <p class="hint">Нажмите Esc, чтобы вернуться на сайт</p>
-    </div>
+    <main>
+        <!-- СЕКЦИЯ БАННЕРА -->
+        <section id="hero" class="hero-section">
+            <div class="hero-content">
+                <h2>Добро пожаловать на наш сайт!</h2>
+                <p>Мы — будущее колледжа, объединяющее активных и талантливых студентов.</p>
+                <a href="#about" class="btn-primary">Узнать больше</a>
+            </div>
+        </section>
 
-    <!-- ИНТЕРФЕЙС ДОБАВЛЕНИЯ НОВОСТЕЙ -->
-    <div id="cms-panel" class="card" style="display: none; max-width: 600px;">
-        <h2>Добавить публикацию</h2>
-        <form id="firebase-news-form" onsubmit="publishNews(event)">
-            <label>Раздел сайта:</label>
-            <select id="post-section">
-                <option value="news">Новости</option>
-                <option value="sector-legal">Правовой сектор</option>
-                <option value="sector-culture">Культурный сектор</option>
-                <option value="sector-sport">Спортивный сектор</option>
-                <option value="sector-info">Информационный сектор</option>
-                <option value="sector-household">Бытовой сектор</option>
-            </select>
+        <!-- ОТСТУП МЕЖДУ РАЗДЕЛАМИ -->
+        <div style="height: 120px; width: 100%;"></div>
 
-            <label>Заголовок:</label>
-            <input type="text" id="post-title" placeholder="Введите заголовок" required>
+        <!-- СЕКЦИЯ: О НАС -->
+        <section id="about" class="about-section">
+            <h2>О нас</h2>
+            <p>Молодёжный Совет ГГКЖТ — это орган студенческого самоуправления, который помогает реализовывать идеи студентов, организовывать мероприятия и защищать права учащихся.</p>
+        </section>
 
-            <label>Текст публикации:</label>
-            <textarea id="post-text" rows="5" placeholder="Напишите текст..." required></textarea>
+        <!-- ОТСТУП МЕЖДУ РАЗДЕЛАМИ -->
+        <div style="height: 120px; width: 100%;"></div>
 
-            <label>Ссылка на фото (необязательно):</label>
-            <input type="text" id="post-img" placeholder="https://...">
+        <!-- СЕКЦИЯ: СЕКТОРА (5 ОРИГИНАЛЬНЫХ СЕКТОРОВ) -->
+        <section id="sectors" class="sectors-section">
+            <h2>Наши сектора</h2>
+            <div class="sectors-grid">
+                <div class="sector-card">
+                    <i class="fas fa-gavel sector-icon"></i>
+                    <h3>Правовой сектор</h3>
+                    <p>Защита прав студентов, контроль дисциплины и правовое просвещение.</p>
+                </div>
+                <div class="sector-card">
+                    <i class="fas fa-palette sector-icon"></i>
+                    <h3>Культурный сектор</h3>
+                    <p>Организация культурно-массовых мероприятий, концертов и творческих вечеров.</p>
+                </div>
+                <div class="sector-card">
+                    <i class="fas fa-running sector-icon"></i>
+                    <h3>Спортивный сектор</h3>
+                    <p>Пропаганда здорового образа жизни и организация спортивных соревнований.</p>
+                </div>
+                <div class="sector-card">
+                    <i class="fas fa-bullhorn sector-icon"></i>
+                    <h3>Информационный сектор</h3>
+                    <p>Освещение жизни колледжа на сайте, в социальных сетях и СМИ.</p>
+                </div>
+                <div class="sector-card">
+                    <i class="fas fa-home sector-icon"></i>
+                    <h3>Бытовой сектор</h3>
+                    <p>Контроль порядка в общежитии, улучшение условий быта и учебы студентов.</p>
+                </div>
+            </div>
+        </section>
 
-            <button type="submit" id="submit-btn" class="btn">Опубликовать для всех</button>
-            <button type="button" class="btn btn-logout" onclick="logout()">Выйти из панели</button>
-        </form>
-        <p class="hint">Нажмите Esc, чтобы мгновенно скрыть панель</p>
-    </div>
+        <!-- ОТСТУП МЕЖДУ РАЗДЕЛАМИ -->
+        <div style="height: 120px; width: 100%;"></div>
 
+        <!-- СЕКЦИЯ: НОВОСТИ -->
+        <section id="news" class="news-section">
+            <h2>Последние новости</h2>
+            <div id="news-container" class="news-grid">
+                <p class="no-news">Пока новостей нет. Зайдите позже!</p>
+            </div>
+        </section>
+
+        <!-- ОТСТУП МЕЖДУ РАЗДЕЛАМИ -->
+        <div style="height: 120px; width: 100%;"></div>
+
+        <!-- СЕКЦИЯ: ОБРАТНАЯ СВЯЗЬ -->
+        <section id="contact" class="contact-section">
+            <h2>Обратная связь</h2>
+            <form id="contact-form">
+                <input type="text" name="name" placeholder="Ваше имя" required>
+                <input type="email" name="email" placeholder="Ваш Email" required>
+                <textarea name="message" placeholder="Ваше сообщение" rows="5" required></textarea>
+                <button type="submit" class="btn-submit">Отправить</button>
+            </form>
+        </section>
+    </main>
+
+    <footer>
+        <p>&copy; 2024 Молодёжный Совет ГГКЖТ. Все права защищены.</p>
+    </footer>
+
+    <!-- СКРИПТЫ: ЧТЕНИЕ FIREBASE И ГОРЯЧАЯ КЛАВИША Ё -->
     <script>
-        const DATABASE_URL = "https://firebaseio.com";
+        document.addEventListener("DOMContentLoaded", () => {
+            const newsContainer = document.getElementById("news-container");
+            const DATABASE_URL = "https://firebaseio.com";
 
-        function checkPin() {
-            const pin = document.getElementById('admin-pin').value.trim();
-            if (pin === "2010") {
-                localStorage.setItem('ms_admin_session', 'active');
-                showPanel();
-            } else {
-                alert('Неверный пин-код доступа!');
-            }
-        }
+            fetch(`${DATABASE_URL}/posts.json`)
+                .then(res => res.ok ? res.json() : null)
+                .then(data => {
+                    if (!data) {
+                        newsContainer.innerHTML = '<p class="no-news">Пока новостей нет. Зайдите позже!</p>';
+                        return;
+                    }
 
-        function showPanel() {
-            document.getElementById('auth-panel').style.display = 'none';
-            document.getElementById('cms-panel').style.display = 'block';
-        }
+                    // Собираем массив и фильтруем только новости
+                    const newsPosts = Object.keys(data).map(key => data[key]).filter(p => p.section === "news");
+                    newsPosts.reverse();
 
-        function logout() {
-            localStorage.removeItem('ms_admin_session');
-            location.reload();
-        }
+                    if (newsPosts.length === 0) {
+                        newsContainer.innerHTML = '<p class="no-news">Пока новостей нет. Зайдите позже!</p>';
+                        return;
+                    }
 
-        // СЛУШАТЕЛЬ КЛАВИШИ ESCAPE ДЛЯ МГНОВЕННОГО СКРЫТИЯ
-        document.addEventListener("keydown", (e) => {
-            if (e.key === "Escape" || e.key === "Esc") {
-                window.location.href = "index.html";
-            }
+                    newsContainer.innerHTML = "";
+                    newsPosts.forEach(post => {
+                        const card = document.createElement("div");
+                        card.className = "news-card";
+                        const imgHtml = post.img ? `<img src="${post.img}" alt="${post.title}" class="news-img">` : "";
+                        card.innerHTML = `${imgHtml}<div class="news-content"><h3>${post.title}</h3><p>${post.text}</p></div>`;
+                        newsContainer.appendChild(card);
+                    });
+                })
+                .catch(err => {
+                    console.error(err);
+                    newsContainer.innerHTML = '<p class="no-news">Пока новостей нет. Зайдите позже!</p>';
+                });
         });
 
-        // Отправка данных формы в Firebase
-        async function publishNews(e) {
-            e.preventDefault();
-            const btn = document.getElementById('submit-btn');
-            const section = document.getElementById('post-section').value;
-            const title = document.getElementById('post-title').value.trim();
-            const text = document.getElementById('post-text').value.trim();
-            const img = document.getElementById('post-img').value.trim();
-
-            btn.disabled = true;
-            btn.innerText = "Публикация...";
-
-            const newPost = {
-                id: Date.now().toString(),
-                section: section,
-                title: title,
-                text: text,
-                img: img,
-                date: new Date().toLocaleDateString('ru-RU')
-            };
-
-            try {
-                const response = await fetch(`${DATABASE_URL}/posts.json`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(newPost)
-                });
-
-                if (response.ok) {
-                    alert('Поздравляем! Новость успешно опубликована глобально для всех устройств!');
-                    document.getElementById('firebase-news-form').reset();
-                } else {
-                    alert('Ошибка отправки данных в Firebase.');
-                }
-            } catch (err) {
-                alert('Сетевая ошибка: ' + err.message);
-            } finally {
-                btn.disabled = false;
-                btn.innerText = "Опубликовать для всех";
+        // СЕКРЕТНЫЙ ВЫЗОВ АДМИНКИ НА КЛАВИШУ Ё (~)
+        document.addEventListener("keydown", (e) => {
+            if (e.key === "ё" || e.key === "Ё" || e.key === "`" || e.key === "~") {
+                window.location.href = "admin.html";
             }
-        }
-
-        if (localStorage.getItem('ms_admin_session') === 'active') {
-            showPanel();
-        }
+        });
     </script>
 </body>
 </html>
