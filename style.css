@@ -1,0 +1,503 @@
+/* ==========================================================================
+   1. СОВРЕМЕННЫЕ ШРИФТЫ И ПЕРЕМЕННЫЕ (ГЛУБОКАЯ ТЕМНАЯ ТЕМА)
+   ========================================================================== */
+@import url('https://googleapis.com');
+
+:root {
+    --primary: #2563eb;          /* Насыщенный технологичный синий */
+    --primary-glow: rgba(37, 99, 235, 0.15);
+    --accent: #60a5fa;           /* Электрический голубой */
+    --bg-main: #0f172a;          /* Глубокий темный фон всей страницы */
+    --bg-card: #1e293b;          /* Контрастный темный для карточек */
+    --bg-card-hover: #263449;    /* Цвет карточки при наведении */
+    --text-main: #f8fafc;        /* Белоснежный основной текст */
+    --text-muted: #94a3b8;       /* Приглушенный серый текст */
+    --border-color: rgba(255, 255, 255, 0.06);
+    --border-hover: rgba(59, 130, 246, 0.3);
+    --radius-lg: 16px;           /* Мягкие скругления углов */
+    --radius-md: 12px;
+    --transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1); /* Плавная анимация */
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+    background-color: var(--bg-main);
+    color: var(--text-main);
+    line-height: 1.6;
+    overflow-x: hidden;
+}
+
+/* ==========================================================================
+   2. СТИЛЬНАЯ ШАПКА САЙТА (ЭФФЕКТ СТЁКЛЫШКА)
+   ========================================================================== */
+header {
+    background: rgba(15, 23, 42, 0.7);
+    backdrop-filter: blur(16px) saturate(180%);
+    -webkit-backdrop-filter: blur(16px) saturate(180%);
+    border-bottom: 1px solid var(--border-color);
+    padding: 1rem 3rem;
+    position: fixed;
+    width: 100%;
+    top: 0;
+    left: 0;
+    z-index: 1000;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: var(--transition);
+}
+
+.logo-container {
+    display: flex;
+    align-items: center;
+    gap: 0.85rem;
+}
+
+.logo-img {
+    height: 42px;
+    width: auto;
+    filter: drop-shadow(0 2px 8px var(--primary-glow));
+    transition: var(--transition);
+}
+
+.logo-container:hover .logo-img {
+    transform: rotate(-5px) scale(1.05);
+}
+
+header h1 {
+    font-size: 1.35rem;
+    font-weight: 800;
+    background: linear-gradient(135deg, #ffffff 40%, var(--accent));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    letter-spacing: -0.03em;
+}
+
+nav ul {
+    display: flex;
+    list-style: none;
+    gap: 0.75rem;
+    align-items: center;
+}
+
+nav a {
+    color: var(--text-muted);
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 0.9rem;
+    transition: var(--transition);
+    padding: 0.6rem 1.1rem;
+    border-radius: var(--radius-md);
+    border: 1px solid transparent;
+}
+
+nav a:hover {
+    color: var(--text-main);
+    background: rgba(255, 255, 255, 0.03);
+    border-color: var(--border-color);
+}
+
+/* Красивое неоновое выделение для кнопки админки */
+nav ul li:last-child a {
+    background: rgba(37, 99, 235, 0.1);
+    color: var(--accent);
+    border: 1px solid rgba(37, 99, 235, 0.2);
+}
+
+nav ul li:last-child a:hover {
+    background: var(--primary);
+    color: #ffffff;
+    box-shadow: 0 0 20px rgba(37, 99, 235, 0.4);
+    border-color: transparent;
+}
+
+/* ==========================================================================
+   3. ГЛАВНЫЙ БАННЕР (HERO SECTION С НЕОНОВЫМ СВЕЧЕНИЕМ)
+   ========================================================================== */
+.hero-section {
+    height: 100vh;
+    min-height: 650px;
+    background: linear-gradient(135deg, rgba(15, 23, 42, 0.98) 30%, rgba(37, 99, 235, 0.12) 100%);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    padding: 0 1.5rem;
+    position: relative;
+}
+
+/* Эффект красивого светящегося тумана на фоне */
+.hero-section::before {
+    content: '';
+    position: absolute;
+    width: 400px;
+    height: 400px;
+    background: var(--primary);
+    filter: blur(140px);
+    opacity: 0.2;
+    bottom: 15%;
+    right: 15%;
+    border-radius: 50%;
+    pointer-events: none;
+}
+
+.hero-content h2 {
+    font-size: 3.5rem;
+    font-weight: 800;
+    letter-spacing: -0.05em;
+    line-height: 1.15;
+    margin-bottom: 1.25rem;
+    background: linear-gradient(135deg, #ffffff 50%, #93c5fd 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.hero-content p {
+    font-size: 1.25rem;
+    margin-bottom: 2.5rem;
+    max-width: 38rem;
+    margin-left: auto;
+    margin-right: auto;
+    color: var(--text-muted);
+}
+
+.btn-primary {
+    display: inline-block;
+    background: linear-gradient(135deg, var(--primary), #1d4ed8);
+    color: var(--text-main);
+    padding: 0.9rem 2.2rem;
+    text-decoration: none;
+    border-radius: var(--radius-md);
+    font-weight: 700;
+    font-size: 0.95rem;
+    transition: var(--transition);
+    box-shadow: 0 10px 25px -5px rgba(37, 99, 235, 0.4);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.btn-primary:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 15px 30px -5px rgba(37, 99, 235, 0.6);
+}
+/* ==========================================================================
+   4. ОБЩИЕ СТИЛИ ДЛЯ СЕКЦИЙ И ЗАГОЛОВКОВ
+   ========================================================================== */
+section {
+    padding: 7.5rem 2rem;
+    max-width: 78rem;
+    margin: 0 auto;
+    position: relative;
+}
+
+section h2 {
+    text-align: center;
+    font-size: 2.5rem;
+    font-weight: 800;
+    letter-spacing: -0.04em;
+    margin-bottom: 4rem;
+    background: linear-gradient(135deg, #ffffff 60%, var(--text-muted));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+/* Декоративная аккуратная линия под каждым заголовком */
+section h2::after {
+    content: '';
+    display: block;
+    width: 40px;
+    height: 4px;
+    background: var(--primary);
+    margin: 0.75rem auto 0;
+    border-radius: 2px;
+    box-shadow: 0 0 10px var(--primary);
+}
+
+/* ==========================================================================
+   5. СЕКЦИЯ: О НАС
+   ========================================================================== */
+.about-section p {
+    text-align: center;
+    font-size: 1.25rem;
+    max-width: 46rem;
+    margin: 0 auto;
+    color: var(--text-muted);
+    font-weight: 500;
+    background: rgba(255, 255, 255, 0.01);
+    padding: 2.5rem;
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--border-color);
+}
+
+/* ==========================================================================
+   6. СЕКЦИЯ: СЕКТОРА (ИСПРАВЛЕННАЯ СЕТКА НА 5 СЕКТОРОВ)
+   ========================================================================== */
+.sectors-grid {
+    display: grid;
+    /* Симметричная адаптивная сетка, которая идеально выстраивает все 5 карточек */
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1.75rem;
+}
+
+.sector-card {
+    background-color: var(--bg-card);
+    padding: 2.5rem 2rem;
+    border-radius: var(--radius-lg);
+    text-align: center;
+    border: 1px solid var(--border-color);
+    transition: var(--transition);
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Неоновый блик внутри карточки при наведении */
+.sector-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background: radial-gradient(circle at top right, rgba(59, 130, 246, 0.08), transparent 60%);
+    opacity: 0;
+    transition: var(--transition);
+}
+
+.sector-card:hover {
+    transform: translateY(-6px);
+    background-color: var(--bg-card-hover);
+    border-color: var(--border-hover);
+    box-shadow: 0 20px 30px -10px rgba(0, 0, 0, 0.3);
+}
+
+.sector-card:hover::before {
+    opacity: 1;
+}
+
+.sector-icon {
+    font-size: 2.25rem;
+    color: var(--accent);
+    margin-bottom: 1.5rem;
+    display: inline-block;
+    transition: var(--transition);
+}
+
+.sector-card:hover .sector-icon {
+    transform: scale(1.1);
+    color: #3b82f6;
+}
+
+.sector-card h3 {
+    font-size: 1.35rem;
+    font-weight: 700;
+    margin-bottom: 0.75rem;
+    letter-spacing: -0.02em;
+    color: var(--text-main);
+}
+
+.sector-card p {
+    color: var(--text-muted);
+    font-size: 0.925rem;
+    line-height: 1.6;
+}
+
+/* ==========================================================================
+   7. СЕКЦИЯ: НОВОСТИ
+   ========================================================================== */
+.news-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(310px, 1fr));
+    gap: 2rem;
+}
+
+.no-news {
+    grid-column: 1 / -1;
+    text-align: center;
+    color: var(--text-muted);
+    font-style: italic;
+}
+
+.news-card {
+    background-color: var(--bg-card);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    border: 1px solid var(--border-color);
+    transition: var(--transition);
+}
+
+.news-card:hover {
+    transform: translateY(-4px) scale(1.01);
+    border-color: var(--border-hover);
+    box-shadow: 0 20px 35px -10px rgba(0, 0, 0, 0.4);
+}
+
+.news-img {
+    width: 100%;
+    height: 13.5rem;
+    object-fit: cover;
+    transition: var(--transition);
+}
+
+.news-card:hover .news-img {
+    transform: scale(1.04);
+}
+
+.news-content {
+    padding: 1.75rem;
+}
+
+.news-date {
+    display: inline-block;
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: var(--accent);
+    background: rgba(59, 130, 246, 0.1);
+    padding: 0.35rem 0.75rem;
+    border-radius: 20px;
+    margin-bottom: 1rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.news-content h3 {
+    font-size: 1.25rem;
+    font-weight: 700;
+    margin-bottom: 0.75rem;
+    letter-spacing: -0.02em;
+    color: var(--text-main);
+}
+
+.news-content p {
+    color: var(--text-muted);
+    font-size: 0.925rem;
+}
+
+/* ==========================================================================
+   8. СЕКЦИЯ: ОБРАТНАЯ СВЯЗЬ (NEO-FORM)
+   ========================================================================== */
+#contact-form {
+    max-width: 34rem;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+    background: var(--bg-card);
+    padding: 3rem;
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--border-color);
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+}
+
+#contact-form input,
+#contact-form textarea {
+    width: 100%;
+    padding: 0.9rem 1.1rem;
+    background-color: rgba(15, 23, 42, 0.4);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    font-size: 0.95rem;
+    color: var(--text-main);
+    font-family: inherit;
+    transition: var(--transition);
+}
+
+#contact-form input::placeholder,
+#contact-form textarea::placeholder {
+    color: #475569;
+}
+
+#contact-form input:focus,
+#contact-form textarea:focus {
+    outline: none;
+    border-color: var(--primary);
+    background-color: rgba(15, 23, 42, 0.7);
+    box-shadow: 0 0 0 4px var(--primary-glow);
+}
+
+.btn-submit {
+    background: var(--primary);
+    color: var(--text-main);
+    padding: 0.9rem 1.5rem;
+    border: none;
+    border-radius: var(--radius-md);
+    font-size: 0.95rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: var(--transition);
+    box-shadow: 0 4px 12px var(--primary-glow);
+}
+
+.btn-submit:hover {
+    background: #1d4ed8;
+    box-shadow: 0 6px 20px rgba(37, 99, 235, 0.5);
+    transform: translateY(-1px);
+}
+
+/* ==========================================================================
+   9. ПОДВАЛ САЙТА (FOOTER)
+   ========================================================================== */
+footer {
+    background-color: #090d16;
+    color: var(--text-muted);
+    text-align: center;
+    padding: 3rem;
+    font-size: 0.9rem;
+    border-top: 1px solid var(--border-color);
+}
+
+/* ==========================================================================
+   10. ИДЕАЛЬНАЯ АДАПТИВНОСТЬ ПОД ТЕЛЕФОНЫ И ПЛАНШЕТЫ
+   ========================================================================== */
+@media (max-width: 992px) {
+    header {
+        padding: 1rem 1.5rem;
+    }
+}
+
+@media (max-width: 768px) {
+    header {
+        flex-direction: column;
+        gap: 1.25rem;
+        padding: 1.25rem 1rem;
+        position: relative; /* Чтобы шапка не перекрывала контент на мобильных */
+        background: var(--bg-main);
+    }
+
+    nav ul {
+        gap: 0.35rem;
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+    
+    nav a {
+        padding: 0.5rem 0.75rem;
+        font-size: 0.85rem;
+    }
+
+    .hero-content h2 {
+        font-size: 2.35rem;
+    }
+
+    .hero-content p {
+        font-size: 1.1rem;
+    }
+
+    section {
+        padding: 4.5rem 1.25rem;
+    }
+    
+    section h2 {
+        font-size: 2rem;
+        margin-bottom: 2.5rem;
+    }
+    
+    #contact-form {
+        padding: 2rem 1.5rem;
+    }
+}

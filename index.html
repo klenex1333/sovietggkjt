@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Молодёжный Совет ГГКЖТ</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cloudflare.com">
+</head>
+<body>
+    <header style="display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 2rem 1rem; background-color: var(--bg-dark); position: relative; width: 100%; box-shadow: 0 4px 10px rgba(0,0,0,0.3);">
+        <div class="logo-container" style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1.5rem; width: 100%; margin-bottom: 1.5rem;">
+            <!-- Логотип прямоугольный с аккуратным скруглением -->
+            <img src="logo.png" alt="Логотип ГГКЖТ" class="logo-img" style="width: 120px; height: auto; border-radius: 8px; object-fit: contain;">
+            <!-- Текст строго по центру и огромным шрифтом -->
+            <h1 style="font-size: 3rem; font-weight: 800; color: var(--white); margin: 0; line-height: 1.2; letter-spacing: -0.03em; width: 100%;">Молодёжный Совет ГГКЖТ</h1>
+        </div>
+        <nav style="width: 100%; display: flex; justify-content: center;">
+            <ul style="display: flex; list-style: none; gap: 1.5rem; padding: 0; margin: 0; flex-wrap: wrap; justify-content: center;">
+                <li><a href="#about" style="font-size: 1.1rem;">О нас</a></li>
+                <li><a href="#sectors" style="font-size: 1.1rem;">Сектора</a></li>
+                <li><a href="#news" style="font-size: 1.1rem;">Новости</a></li>
+                <li><a href="#contact" style="font-size: 1.1rem;">Контакты</a></li>
+                <li><a href="admin.html" style="font-size: 1.1rem;">Админ-панель</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main>
+        <!-- СЕКЦИЯ БАННЕРА -->
+        <section id="hero" class="hero-section">
+            <div class="hero-content">
+                <h2>Добро пожаловать на наш сайт!</h2>
+                <p>Мы — будущее колледжа, объединяющее активных и талантливых студентов.</p>
+                <a href="#about" class="btn-primary">Узнать больше</a>
+            </div>
+        </section>
+
+        <!-- ОТСТУП МЕЖДУ РАЗДЕЛАМИ -->
+        <div style="height: 120px; width: 100%;"></div>
+
+        <!-- СЕКЦИЯ: О НАС -->
+        <section id="about" class="about-section">
+            <h2>О нас</h2>
+            <p>Молодёжный Совет ГГКЖТ — это орган студенческого самоуправления, который помогает реализовывать идеи студентов, организовывать мероприятия и защищать права учащихся.</p>
+        </section>
+
+        <!-- ОТСТУП МЕЖДУ РАЗДЕЛАМИ -->
+        <div style="height: 120px; width: 100%;"></div>
+
+        <!-- СЕКЦИЯ: СЕКТОРА -->
+        <section id="sectors" class="sectors-section">
+            <h2>Наши сектора</h2>
+            <div class="sectors-grid">
+                <div class="sector-card">
+                    <i class="fas fa-gavel sector-icon"></i>
+                    <h3>Правовой сектор</h3>
+                    <p>Защита прав студентов, контроль дисциплины и правовое просвещение.</p>
+                </div>
+                <div class="sector-card">
+                    <i class="fas fa-palette sector-icon"></i>
+                    <h3>Культурный сектор</h3>
+                    <p>Организация культурно-массовых мероприятий, концертов и творческих вечеров.</p>
+                </div>
+                <div class="sector-card">
+                    <i class="fas fa-running sector-icon"></i>
+                    <h3>Спортивный сектор</h3>
+                    <p>Пропаганда здорового образа жизни и организация спортивных соревнований.</p>
+                </div>
+                <div class="sector-card">
+                    <i class="fas fa-bullhorn sector-icon"></i>
+                    <h3>Информационный сектор</h3>
+                    <p>Освещение жизни колледжа на сайте, в социальных сетях и СМИ.</p>
+                </div>
+                <div class="sector-card">
+                    <i class="fas fa-home sector-icon"></i>
+                    <h3>Бытовой сектор</h3>
+                    <p>Контроль порядка в общежитии, улучшение условий быта и учебы студентов.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- ОТСТУП МЕЖДУ РАЗДЕЛАМИ -->
+        <div style="height: 120px; width: 100%;"></div>
+
+        <!-- СЕКЦИЯ: НОВОСТИ -->
+        <section id="news" class="news-section">
+            <h2>Последние новости</h2>
+            <div id="news-container" class="news-grid">
+                <p class="no-news">Пока новостей нет. Зайдите позже!</p>
+            </div>
+        </section>
+
+        <!-- ОТСТУП МЕЖДУ РАЗДЕЛАМИ -->
+        <div style="height: 120px; width: 100%;"></div>
+
+        <!-- СЕКЦИЯ: ОБРАТНАЯ СВЯЗЬ -->
+        <section id="contact" class="contact-section">
+            <h2>Обратная связь</h2>
+            <form id="contact-form">
+                <input type="text" name="name" placeholder="Ваше имя" required>
+                <input type="email" name="email" placeholder="Ваш Email" required>
+                <textarea name="message" placeholder="Ваше сообщение" rows="5" required></textarea>
+                <button type="submit" class="btn-submit">Отправить</button>
+            </form>
+        </section>
+    </main>
+
+    <footer>
+        <p>&copy; 2024 Молодёжный Совет ГГКЖТ. Все права защищены.</p>
+    </footer>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            const newsContainer = document.getElementById("news-container");
+            fetch("data.json")
+                .then(res => res.ok ? res.json() : {} )
+                .then(data => {
+                    const newsPosts = data.posts ? data.posts.filter(p => p.section === "news") : [];
+                    if (newsPosts.length === 0) return;
+                    newsContainer.innerHTML = "";
+                    newsPosts.forEach(post => {
+                        const card = document.createElement("div");
+                        card.className = "news-card";
+                        const imgHtml = post.img ? `<img src="${post.img}" alt="${post.title}" class="news-img">` : "";
+                        card.innerHTML = `${imgHtml}<div class="news-content"><span class="news-date">${post.date || ""}</span><h3>${post.title}</h3><p>${post.text}</p></div>`;
+                        newsContainer.appendChild(card);
+                    });
+                })
+                .catch(err => console.log(err));
+        });
+    </script>
+</body>
+</html>

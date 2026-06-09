@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Глобальная панель МС ГГКЖТ</title>
+</head>
+<body style="background-color: #1e293b; margin: 0; padding: 0;">
+
+  <div id="nc-root"></div>
+
+  <!-- Подключаем стабильный движок админки -->
+  <script src="https://jsdelivr.net"></script>
+  
+  <script>
+    window.CMS_MANUAL_INIT = true;
+    CMS.init({
+      config: {
+        backend: {
+          name: "github",
+          // ВНИМАНИЕ: Замените строчку ниже на ваш гитхаб и имя репозитория!
+          repo: "ВАШ_ЛОГИН_GITHUB/ИМЯ_ВАШЕГО_РЕПОЗИТОРИЯ",
+          branch: "main"
+        },
+        media_folder: "", 
+        public_folder: "/",
+        collections: [
+          {
+            name: "global_data",
+            label: "Глобальный контент",
+            delete: false,
+            editor: { preview: false },
+            files: [
+              {
+                file: "data.json",
+                name: "site_database",
+                label: "База данных сайта",
+                fields: [
+                  { label: "Статус в шапке сайта", name: "status", widget: "string" },
+                  {
+                    label: "Все публикации",
+                    name: "posts",
+                    widget: "list",
+                    summary: "{{title}} [{{section}}]",
+                    fields: [
+                      { label: "Уникальный ID", name: "id", widget: "string" },
+                      {
+                        label: "Раздел сайта",
+                        name: "section",
+                        widget: "select",
+                        options: [
+                          { label: "Главная", value: "home" },
+                          { label: "Новости", value: "news" },
+                          { label: "Правовой сектор", value: "sector-legal" },
+                          { label: "Культурный сектор", value: "sector-culture" },
+                          { label: "Спортивный сектор", value: "sector-sport" },
+                          { label: "Информационный сектор", value: "sector-info" },
+                          { label: "Бытовой сектор", value: "sector-household" },
+                          { label: "Мероприятия", value: "events" },
+                          { label: "О нас", value: "about" }
+                        ]
+                      },
+                      { label: "Заголовок публикации", name: "title", widget: "string" },
+                      { label: "Текст публикации", name: "text", widget: "text" },
+                      { label: "Фото (Изображение)", name: "img", widget: "image", required: false },
+                      { label: "Дата публикации", name: "date", widget: "string" },
+                      { label: "Просмотры", name: "views", widget: "number", default: 0 }
+                    ]
+                  },
+                  {
+                    label: "Фоны секторов",
+                    name: "backgrounds",
+                    widget: "object",
+                    fields: [
+                      { label: "Правовой сектор", name: "sector-legal", widget: "image", required: false },
+                      { label: "Культурный сектор", name: "sector-culture", widget: "image", required: false },
+                      { label: "Спортивный сектор", name: "sector-sport", widget: "image", required: false },
+                      { label: "Информационный сектор", name: "sector-info", widget: "image", required: false },
+                      { label: "Бытовой сектор", name: "sector-household", widget: "image", required: false }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    });
+  </script>
+</body>
+</html>
