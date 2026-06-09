@@ -110,24 +110,27 @@
         <p>&copy; 2024 Молодёжный Совет ГГКЖТ. Все права защищены.</p>
     </footer>
 
-    <script>
+        <script>
         document.addEventListener("DOMContentLoaded", () => {
             const newsContainer = document.getElementById("news-container");
-            fetch("data.json")
-                .then(res => res.ok ? res.json() : {} )
-                .then(data => {
-                    const newsPosts = data.posts ? data.posts.filter(p => p.section === "news") : [];
-                    if (newsPosts.length === 0) return;
-                    newsContainer.innerHTML = "";
-                    newsPosts.forEach(post => {
-                        const card = document.createElement("div");
-                        card.className = "news-card";
-                        const imgHtml = post.img ? `<img src="${post.img}" alt="${post.title}" class="news-img">` : "";
-                        card.innerHTML = `${imgHtml}<div class="news-content"><span class="news-date">${post.date || ""}</span><h3>${post.title}</h3><p>${post.text}</p></div>`;
-                        newsContainer.appendChild(card);
-                    });
-                })
-                .catch(err => console.log(err));
+            
+            // Считываем новости напрямую из памяти браузера
+            const newsPosts = JSON.parse(localStorage.getItem('global_site_news')) || [];
+            const filteredNews = newsPosts.filter(p => p.section === "news");
+            
+            if (filteredNews.length === 0) {
+                newsContainer.innerHTML = '<p class="no-news">Пока новостей нет. Зайдите позже!</p>';
+                return;
+            }
+
+            newsContainer.innerHTML = "";
+            filteredNews.forEach(post => {
+                const card = document.createElement("div");
+                card.className = "news-card";
+                const imgHtml = post.img ? `<img src="${post.img}" alt="${post.title}" class="news-img">` : "";
+                card.innerHTML = `${imgHtml}<div class="news-content"><h3>${post.title}</h3><p>${post.text}</p></div>`;
+                newsContainer.appendChild(card);
+            });
         });
     </script>
 </body>
