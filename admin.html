@@ -3,22 +3,35 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Панель управления МС</title>
+    <title>Вход в систему управления МС</title>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: system-ui, sans-serif; }
         body { background-color: #0f172a; color: #f8fafc; display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 1.5rem; }
-        .card { background: #1e293b; padding: 2.5rem; border-radius: 16px; box-shadow: 0 15px 30px rgba(0,0,0,0.4); max-width: 550px; width: 100%; border: 1px solid rgba(255,255,255,0.05); }
+        .card { background: #1e293b; padding: 2.5rem; border-radius: 16px; box-shadow: 0 15px 30px rgba(0,0,0,0.4); max-width: 450px; width: 100%; border: 1px solid rgba(255,255,255,0.05); }
         h2 { font-size: 1.75rem; font-weight: 800; margin-bottom: 1.5rem; text-align: center; color: #fff; }
         label { display: block; font-size: 0.875rem; font-weight: 600; color: #94a3b8; margin-bottom: 0.5rem; }
         input, textarea, select { width: 100%; padding: 0.75rem 1rem; background: #0f172a; border: 1px solid #334155; border-radius: 8px; color: #fff; font-size: 0.95rem; margin-bottom: 1.25rem; transition: all 0.3s; }
         input:focus, textarea:focus, select:focus { outline: none; border-color: #2563eb; box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.2); }
         .btn { width: 100%; padding: 0.9rem; background: linear-gradient(135deg, #2563eb, #1d4ed8); color: #fff; border: none; border-radius: 8px; font-weight: 700; font-size: 1rem; cursor: pointer; transition: all 0.3s; box-shadow: 0 4px 12px rgba(37,99,235,0.3); }
         .btn:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(37,99,235,0.4); }
+        .btn-logout { background: #334155; margin-top: 0.75rem; box-shadow: none; }
+        .btn-logout:hover { background: #475569; box-shadow: none; }
+        .hint { font-size: 0.8rem; color: #64748b; margin-top: 1rem; text-align: center; }
     </style>
 </head>
 <body>
 
-    <div class="card">
+    <!-- БЛОК СЕКРЕТНОГО ПАРОЛЯ -->
+    <div id="auth-panel" class="card">
+        <h2>Доступ ограничен</h2>
+        <label>Введите пин-код администратора:</label>
+        <input type="password" id="admin-pin" placeholder="****" autofocus>
+        <button class="btn" onclick="checkPin()">Войти</button>
+        <p class="hint">Нажмите Esc, чтобы вернуться на сайт</p>
+    </div>
+
+    <!-- ИНТЕРФЕЙС ДОБАВЛЕНИЯ НОВОСТЕЙ -->
+    <div id="cms-panel" class="card" style="display: none; max-width: 600px;">
         <h2>Добавить публикацию</h2>
         <form id="firebase-news-form" onsubmit="publishNews(event)">
             <label>Раздел сайта:</label>
@@ -41,13 +54,42 @@
             <input type="text" id="post-img" placeholder="https://...">
 
             <button type="submit" id="submit-btn" class="btn">Опубликовать для всех</button>
+            <button type="button" class="btn btn-logout" onclick="logout()">Выйти из панели</button>
         </form>
+        <p class="hint">Нажмите Esc, чтобы мгновенно скрыть панель</p>
     </div>
 
     <script>
-        // Ваша точная ссылка на базу данных Firebase
-        const DATABASE_URL = "https://basez-db21d-default-rtdb.firebaseio.com";
+        const DATABASE_URL = "https://firebaseio.com";
 
+        function checkPin() {
+            const pin = document.getElementById('admin-pin').value.trim();
+            if (pin === "2010") {
+                localStorage.setItem('ms_admin_session', 'active');
+                showPanel();
+            } else {
+                alert('Неверный пин-код доступа!');
+            }
+        }
+
+        function showPanel() {
+            document.getElementById('auth-panel').style.display = 'none';
+            document.getElementById('cms-panel').style.display = 'block';
+        }
+
+        function logout() {
+            localStorage.removeItem('ms_admin_session');
+            location.reload();
+        }
+
+        // СЛУШАТЕЛЬ КЛАВИШИ ESCAPE ДЛЯ МГНОВЕННОГО СКРЫТИЯ
+        document.addEventListener("keydown", (e) => {
+            if (e.key === "Escape" || e.key === "Esc") {
+                window.location.href = "index.html";
+            }
+        });
+
+        // Отправка данных формы в Firebase
         async function publishNews(e) {
             e.preventDefault();
             const btn = document.getElementById('submit-btn');
@@ -79,7 +121,7 @@
                     alert('Поздравляем! Новость успешно опубликована глобально для всех устройств!');
                     document.getElementById('firebase-news-form').reset();
                 } else {
-                    alert('Ошибка базы данных. Убедитесь, что в Firebase во вкладке Rules (Правила) включен Test Mode!');
+                    alert('Ошибка отправки данных в Firebase.');
                 }
             } catch (err) {
                 alert('Сетевая ошибка: ' + err.message);
@@ -87,6 +129,10 @@
                 btn.disabled = false;
                 btn.innerText = "Опубликовать для всех";
             }
+        }
+
+        if (localStorage.getItem('ms_admin_session') === 'active') {
+            showPanel();
         }
     </script>
 </body>
