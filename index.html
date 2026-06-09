@@ -110,27 +110,43 @@
         <p>&copy; 2024 Молодёжный Совет ГГКЖТ. Все права защищены.</p>
     </footer>
 
-        <script>
+           <script>
         document.addEventListener("DOMContentLoaded", () => {
             const newsContainer = document.getElementById("news-container");
-            
-            // Считываем новости напрямую из памяти браузера
-            const newsPosts = JSON.parse(localStorage.getItem('global_site_news')) || [];
-            const filteredNews = newsPosts.filter(p => p.section === "news");
-            
-            if (filteredNews.length === 0) {
-                newsContainer.innerHTML = '<p class="no-news">Пока новостей нет. Зайдите позже!</p>';
-                return;
-            }
+            const DATABASE_URL = "https://basez-db21d-default-rtdb.firebaseio.com";
 
-            newsContainer.innerHTML = "";
-            filteredNews.forEach(post => {
-                const card = document.createElement("div");
-                card.className = "news-card";
-                const imgHtml = post.img ? `<img src="${post.img}" alt="${post.title}" class="news-img">` : "";
-                card.innerHTML = `${imgHtml}<div class="news-content"><h3>${post.title}</h3><p>${post.text}</p></div>`;
-                newsContainer.appendChild(card);
-            });
+            fetch(`${DATABASE_URL}/posts.json`)
+                .then(res => res.ok ? res.json() : null)
+                .then(data => {
+                    if (!data) {
+                        newsContainer.innerHTML = '<p class="no-news">Пока новостей нет. Зайдите позже!</p>';
+                        return;
+                    }
+
+                    // Трансформируем объект Firebase в массив и фильтруем только новости
+                    const newsPosts = Object.keys(data).map(key => data[key]).filter(p => p.section === "news");
+                    
+                    // Разворачиваем массив, чтобы новые посты шли первыми (вверху)
+                    newsPosts.reverse();
+
+                    if (newsPosts.length === 0) {
+                        newsContainer.innerHTML = '<p class="no-news">Пока новостей нет. Зайдите позже!</p>';
+                        return;
+                    }
+
+                    newsContainer.innerHTML = "";
+                    newsPosts.forEach(post => {
+                        const card = document.createElement("div");
+                        card.className = "news-card";
+                        const imgHtml = post.img ? `<img src="${post.img}" alt="${post.title}" class="news-img">` : "";
+                        card.innerHTML = `${imgHtml}<div class="news-content"><h3>${post.title}</h3><p>${post.text}</p></div>`;
+                        newsContainer.appendChild(card);
+                    });
+                })
+                .catch(err => {
+                    console.error(err);
+                    newsContainer.innerHTML = '<p class="no-news">Пока новостей нет. Зайдите позже!</p>';
+                });
         });
     </script>
 </body>
