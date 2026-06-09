@@ -16,6 +16,7 @@
         .btn:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(37,99,235,0.4); }
         .btn-logout { background: #334155; margin-top: 0.75rem; box-shadow: none; }
         .btn-logout:hover { background: #475569; box-shadow: none; }
+        .hint { font-size: 0.8rem; color: #64748b; margin-top: 1rem; text-align: center; }
     </style>
 </head>
 <body>
@@ -24,8 +25,9 @@
     <div id="auth-panel" class="card">
         <h2>Доступ ограничен</h2>
         <label>Введите пин-код администратора:</label>
-        <input type="password" id="admin-pin" placeholder="****">
+        <input type="password" id="admin-pin" placeholder="****" autofocus>
         <button class="btn" onclick="checkPin()">Войти</button>
+        <p class="hint">Нажмите Esc, чтобы вернуться на сайт</p>
     </div>
 
     <!-- ИНТЕРФЕЙС ДОБАВЛЕНИЯ НОВОСТЕЙ -->
@@ -52,14 +54,14 @@
             <input type="text" id="post-img" placeholder="https://...">
 
             <button type="submit" id="submit-btn" class="btn">Опубликовать для всех</button>
-            <button type="button" class="btn btn-logout" onclick="logout()">Выйти</button>
+            <button type="button" class="btn btn-logout" onclick="logout()">Выйти из панели</button>
         </form>
+        <p class="hint">Нажмите Esc, чтобы мгновенно скрыть панель</p>
     </div>
 
     <script>
         const DATABASE_URL = "https://firebaseio.com";
 
-        // Проверка пин-кода 2010
         function checkPin() {
             const pin = document.getElementById('admin-pin').value.trim();
             if (pin === "2010") {
@@ -80,6 +82,14 @@
             location.reload();
         }
 
+        // СЛУШАТЕЛЬ КЛАВИШИ ESCAPE ДЛЯ МГНОВЕННОГО СКРЫТИЯ
+        document.addEventListener("keydown", (e) => {
+            if (e.key === "Escape" || e.key === "Esc") {
+                window.location.href = "index.html";
+            }
+        });
+
+        // Отправка данных формы в Firebase
         async function publishNews(e) {
             e.preventDefault();
             const btn = document.getElementById('submit-btn');
@@ -111,7 +121,7 @@
                     alert('Поздравляем! Новость успешно опубликована глобально для всех устройств!');
                     document.getElementById('firebase-news-form').reset();
                 } else {
-                    alert('Ошибка базы данных.');
+                    alert('Ошибка отправки данных в Firebase.');
                 }
             } catch (err) {
                 alert('Сетевая ошибка: ' + err.message);
@@ -121,7 +131,6 @@
             }
         }
 
-        // Проверка активной сессии при загрузке
         if (localStorage.getItem('ms_admin_session') === 'active') {
             showPanel();
         }
