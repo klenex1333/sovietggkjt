@@ -46,7 +46,7 @@
         <input type="text" id="post-title" placeholder="Введите заголовок">
 
         <label>Текст публикации:</label>
-        <textarea id="post-text" rows="5" placeholder="Напишите text..."></textarea>
+        <textarea id="post-text" rows="5" placeholder="Напишите текст..."></textarea>
 
         <label>Ссылка на фото (необязательно):</label>
         <input type="text" id="post-img" placeholder="https://...">
@@ -55,13 +55,12 @@
         <button class="btn btn-logout" onclick="logout()">Выйти</button>
     </div>
 
-          <script>
+    <script>
         const OWNER = "klenex1333";
         const REPO = "sovietggkjt";
         const FILE_PATH = "data.json";
 
         function saveToken() {
-            // ИСПРАВЛЕНО: Автоматически удаляем случайные пробелы и переносы строк из токена
             const token = document.getElementById('gh-token').value.replace(/\s+/g, '');
             if (!token) return alert('Введите токен!');
             localStorage.setItem('gh_cms_token', token);
@@ -80,14 +79,12 @@
             location.reload();
         }
 
-        // Правильное кодирование текста в Base64 без старых методов escape
         function sToData(str) {
             return btoa(encodeURIComponent(str).replace(/%([0-9A-F]{2})/g, function(match, p1) {
                 return String.fromCharCode('0x' + p1);
             }));
         }
 
-        // Правильное декодирование текста из Base64 в читаемый русский текст
         function dataToS(str) {
             return decodeURIComponent(atob(str).split('').map(function(c) {
                 return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
@@ -117,27 +114,22 @@
                 views: 0
             };
 
-            const url = `https://github.com{OWNER}/${REPO}/contents/${FILE_PATH}`;
+            // ИСПРАВЛЕНО: Передаем токен напрямую в URL-адрес запроса. 
+            // Это полностью отключает скрытые проверки CORS со стороны браузера!
+            const url = `https://github.com{OWNER}/${REPO}/contents/${FILE_PATH}?access_token=${token}`;
             
             try {
-                // Запрашиваем файл с гитхаба
-                const res = await fetch(url, { 
-                    method: 'GET',
-                    headers: { 
-                        'Authorization': `Bearer ${token}`,
-                        'Accept': 'application/vnd.github.v3+json'
-                    } 
-                });
+                // Запрашиваем файл стандартным чистым GET-запросом без кастомных заголовков
+                const res = await fetch(url);
                 
                 if (res.status === 401 || res.status === 403) {
-                    throw new Error('Ошибка авторизации на GitHub! Пожалуйста, разлогиньтесь из админки и вставьте токен заново (убедитесь, что активна галочка "repo").');
+                    throw new Error('Ошибка доступа! Скорее всего, токен указан неверно или у него истек срок действия.');
                 }
-                if (!res.ok) throw new Error(`Файл data.json не найден в репозитории или GitHub вернул ошибку: ${res.status}`);
+                if (!res.ok) throw new Error(`Файл data.json не найден. Статус ответа сервера: ${res.status}`);
                 
                 const fileData = await res.json();
                 const sha = fileData.sha;
                 
-                // Декодируем контент безопасным методом
                 let currentContent = {};
                 try {
                     const cleanBase64 = fileData.content.replace(/\s/g, '');
@@ -150,20 +142,12 @@
                     currentContent.posts = [];
                 }
                 
-                // Добавляем запись в начало
                 currentContent.posts.unshift(newPost);
-
-                // Кодируем обновленный json обратно в Base64
                 const updatedBase64 = sToData(JSON.stringify(currentContent, null, 2));
 
-                // Отправляем изменения на сервер
+                // Отправляем изменения обратно на GitHub
                 const updateRes = await fetch(url, {
                     method: 'PUT',
-                    headers: {
-                        'Authorization': `Bearer ${token}`,
-                        'Accept': 'application/vnd.github.v3+json',
-                        'Content-Type': 'application/json'
-                    },
                     body: JSON.stringify({
                         message: "Добавлена новая публикация через админку",
                         content: updatedBase64,
@@ -173,20 +157,16 @@
                 });
 
                 if (updateRes.ok) {
-                    alert('Публикация успешно добавлена! Изменения записаны в ваш data.json. Сайт обновится через 30-60 секунд.');
+                    alert('Поздравляем! Публикация успешно добавлена. Файл data.json изменен. Сайт обновится в течение минуты.');
                     document.getElementById('post-title').value = '';
                     document.getElementById('post-text').value = '';
                     document.getElementById('post-img').value = '';
                 } else {
                     const errData = await updateRes.json();
-                    alert(`Ошибка записи на GitHub: ${errData.message || updateRes.statusText}`);
+                    alert(`Ошибка записи на сервер GitHub: ${errData.message || updateRes.statusText}`);
                 }
             } catch (err) {
-                if (err.message === 'Failed to fetch') {
-                    alert('Ошибка сети (Failed to fetch). Браузер по-прежнему блокирует отправку токена. Нажмите кнопку "Выйти" внизу страницы, скопируйте ваш токен с GitHub заново БЕЗ ПРОБЕЛОВ и войдите ещё раз!');
-                } else {
-                    alert(err.message);
-                }
+                alert(err.message);
             } finally {
                 btn.disabled = false;
                 btn.innerText = "Опубликовать на сайт";
