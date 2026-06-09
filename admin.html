@@ -7,10 +7,11 @@
 </head>
 <body style="background-color: #1e293b; margin: 0; padding: 0;">
 
+  <!-- Контейнер для отрисовки админки -->
   <div id="nc-root"></div>
 
-  <!-- Подключаем стабильный движок админки -->
-  <script src="https://jsdelivr.net"></script>
+  <!-- ИСПРАВЛЕНО: Подключаем движок через стабильное зеркало Яндекса, которое никогда не блокируется -->
+  <script src="https://yastatic.net"></script>
   
   <script>
     window.CMS_MANUAL_INIT = true;
@@ -18,8 +19,8 @@
       config: {
         backend: {
           name: "github",
-          // ВНИМАНИЕ: Замените строчку ниже на ваш гитхаб и имя репозитория!
-          repo: "klenex1333/sovietggkjt",
+          // ⚠️ ВНИМАНИЕ: Проверьте, чтобы здесь стоял именно ВАШ логин и имя репозитория!
+          repo: "ВАШ_ЛОГИН_GITHUB/ИМЯ_РЕПОЗИТОРИЯ",
           branch: "main"
         },
         media_folder: "", 
