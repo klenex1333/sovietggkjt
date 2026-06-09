@@ -1,92 +1,150 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="ru">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Глобальная панель МС ГГКЖТ</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Вход в систему управления МС</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: system-ui, sans-serif; }
+        body { background-color: #0f172a; color: #f8fafc; display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 1.5rem; }
+        .card { background: #1e293b; padding: 2.5rem; border-radius: 16px; box-shadow: 0 15px 30px rgba(0,0,0,0.4); max-width: 450px; width: 100%; border: 1px solid rgba(255,255,255,0.05); }
+        h2 { font-size: 1.75rem; font-weight: 800; margin-bottom: 1.5rem; text-align: center; color: #fff; }
+        label { display: block; font-size: 0.875rem; font-weight: 600; color: #94a3b8; margin-bottom: 0.5rem; }
+        input, textarea, select { width: 100%; padding: 0.75rem 1rem; background: #0f172a; border: 1px solid #334155; border-radius: 8px; color: #fff; font-size: 0.95rem; margin-bottom: 1.25rem; transition: all 0.3s; }
+        input:focus, textarea:focus, select:focus { outline: none; border-color: #2563eb; box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.2); }
+        .btn { width: 100%; padding: 0.9rem; background: linear-gradient(135deg, #2563eb, #1d4ed8); color: #fff; border: none; border-radius: 8px; font-weight: 700; font-size: 1rem; cursor: pointer; transition: all 0.3s; box-shadow: 0 4px 12px rgba(37,99,235,0.3); }
+        .btn:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(37,99,235,0.4); }
+        .btn-logout { background: #334155; margin-top: 0.75rem; box-shadow: none; }
+        .btn-logout:hover { background: #475569; box-shadow: none; }
+    </style>
 </head>
-<body style="background-color: #1e293b; margin: 0; padding: 0;">
+<body>
 
-  <!-- Контейнер для отрисовки админки -->
-  <div id="nc-root"></div>
+    <!-- ОКНО ВХОДА (ОНО ГАРАНТИРОВАННО ПОЯВИТСЯ) -->
+    <div id="auth-panel" class="card">
+        <h2>Авторизация GitHub</h2>
+        <label>Вставьте ваш Personal Access Token (classic):</label>
+        <input type="password" id="gh-token" placeholder="ghp_xxxxxxxxxxxx">
+        <button class="btn" onclick="saveToken()">Войти в админку</button>
+    </div>
 
-  <!-- ИСПРАВЛЕНО: Подключаем полный и точный путь к движку через зеркало Яндекса -->
-  <script src="https://yastatic.net"></script>
-  
-  <script>
-    window.CMS_MANUAL_INIT = true;
-    CMS.init({
-      config: {
-        backend: {
-          name: "github",
-          // ИСПРАВЛЕНО: Оставлена только одна правильная строка с вашим репозиторием!
-          repo: "klenex1333/sovietggkjt",
-          branch: "main"
-        },
-        media_folder: "", 
-        public_folder: "/",
-        collections: [
-          {
-            name: "global_data",
-            label: "Глобальный контент",
-            delete: false,
-            editor: { preview: false },
-            files: [
-              {
-                file: "data.json",
-                name: "site_database",
-                label: "База данных сайта",
-                fields: [
-                  { label: "Статус в шапке сайта", name: "status", widget: "string" },
-                  {
-                    label: "Все публикации",
-                    name: "posts",
-                    widget: "list",
-                    summary: "{{title}} [{{section}}]",
-                    fields: [
-                      { label: "Уникальный ID", name: "id", widget: "string" },
-                      {
-                        label: "Раздел сайта",
-                        name: "section",
-                        widget: "select",
-                        options: [
-                          { label: "Главная", value: "home" },
-                          { label: "Новости", value: "news" },
-                          { label: "Правовой сектор", value: "sector-legal" },
-                          { label: "Культурный сектор", value: "sector-culture" },
-                          { label: "Спортивный сектор", value: "sector-sport" },
-                          { label: "Информационный сектор", value: "sector-info" },
-                          { label: "Бытовой сектор", value: "sector-household" },
-                          { label: "Мероприятия", value: "events" },
-                          { label: "О нас", value: "about" }
-                        ]
-                      },
-                      { label: "Заголовок публикации", name: "title", widget: "string" },
-                      { label: "Текст публикации", name: "text", widget: "text" },
-                      { label: "Фото (Изображение)", name: "img", widget: "image", required: false },
-                      { label: "Дата публикации", name: "date", widget: "string" },
-                      { label: "Просмотры", name: "views", widget: "number", default: 0 }
-                    ]
-                  },
-                  {
-                    label: "Фоны секторов",
-                    name: "backgrounds",
-                    widget: "object",
-                    fields: [
-                      { label: "Правовой сектор", name: "sector-legal", widget: "image", required: false },
-                      { label: "Культурный сектор", name: "sector-culture", widget: "image", required: false },
-                      { label: "Спортивный сектор", name: "sector-sport", widget: "image", required: false },
-                      { label: "Информационный сектор", name: "sector-info", widget: "image", required: false },
-                      { label: "Бытовой сектор", name: "sector-household", widget: "image", required: false }
-                    ]
-                  }
-                ]
-              }
-            ]
-          }
-        ]
-      }
-    });
-  </script>
+    <!-- ИНТЕРФЕЙС ДОБАВЛЕНИЯ КОНТЕНТА -->
+    <div id="cms-panel" class="card" style="display: none; max-width: 600px;">
+        <h2>Добавить публикацию</h2>
+        
+        <label>Раздел сайта:</label>
+        <select id="post-section">
+            <option value="news">Новости</option>
+            <option value="sector-legal">Правовой сектор</option>
+            <option value="sector-culture">Культурный сектор</option>
+            <option value="sector-sport">Спортивный сектор</option>
+            <option value="sector-info">Информационный сектор</option>
+            <option value="sector-household">Бытовой сектор</option>
+        </select>
+
+        <label>Заголовок:</label>
+        <input type="text" id="post-title" placeholder="Введите заголовок">
+
+        <label>Текст публикации:</label>
+        <textarea id="post-text" rows="5" placeholder="Напишите текст..."></textarea>
+
+        <label>Ссылка на фото (необязательно):</label>
+        <input type="text" id="post-img" placeholder="https://...">
+
+        <button class="btn" onclick="uploadToGitHub()">Опубликовать на сайт</button>
+        <button class="btn btn-logout" onclick="logout()">Выйти</button>
+    </div>
+
+    <script>
+        // Замените на ваши точные данные репозитория!
+        const OWNER = "klenex1333";
+        const REPO = "sovietggkjt";
+        const FILE_PATH = "data.json";
+
+        function saveToken() {
+            const token = document.getElementById('gh-token').value.trim();
+            if (!token) return alert('Введите токен!');
+            localStorage.setItem('gh_cms_token', token);
+            checkAuth();
+        }
+
+        function checkAuth() {
+            if (localStorage.getItem('gh_cms_token')) {
+                document.getElementById('auth-panel').style.display = 'none';
+                document.getElementById('cms-panel').style.display = 'block';
+            }
+        }
+
+        function logout() {
+            localStorage.removeItem('gh_cms_token');
+            location.reload();
+        }
+
+        // Логика прямой отправки файла в ваш репозиторий GitHub
+        async function uploadToGitHub() {
+            const token = localStorage.getItem('gh_cms_token');
+            const section = document.getElementById('post-section').value;
+            const title = document.getElementById('post-title').value.trim();
+            const text = document.getElementById('post-text').value.trim();
+            const img = document.getElementById('post-img').value.trim();
+
+            if (!title || !text) return alert('Заполните заголовок и текст!');
+
+            const newPost = {
+                id: Date.now().toString(),
+                section: section,
+                title: title,
+                text: text,
+                img: img,
+                date: new Date().toLocaleDateString('ru-RU'),
+                views: 0
+            };
+
+            const url = `https://github.com{OWNER}/${REPO}/contents/${FILE_PATH}`;
+            
+            try {
+                // 1. Получаем текущую версию файла data.json и его SHA-хэш
+                const res = await fetch(url, { headers: { 'Authorization': `token ${token}` } });
+                if (!res.ok) throw new Error('Не удалось подключиться к GitHub. Проверьте ваш токен.');
+                
+                const fileData = await res.json();
+                const sha = fileData.sha;
+                const currentContent = JSON.parse(atob(fileData.content.replace(/\s/g, '')));
+
+                // 2. Добавляем новую новость в массив
+                if (!currentContent.posts) currentContent.posts = [];
+                currentContent.posts.unshift(newPost);
+
+                // 3. Отправляем обновленный json обратно на гитхаб
+                const updateRes = await fetch(url, {
+                    method: 'PUT',
+                    headers: {
+                        'Authorization': `token ${token}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        message: "Добавлена новая публикация через админку",
+                        content: btoa(unescape(encodeURIComponent(JSON.stringify(currentContent, null, 2)))),
+                        sha: sha,
+                        branch: "main"
+                    })
+                });
+
+                if (updateRes.ok) {
+                    alert('Публикация успешно добавлена! Сайт обновится в течение минуты.');
+                    document.getElementById('post-title').value = '';
+                    document.getElementById('post-text').value = '';
+                    document.getElementById('post-img').value = '';
+                } else {
+                    alert('Ошибка при сохранении на GitHub.');
+                }
+            } catch (err) {
+                alert(err.message);
+            }
+        }
+
+        // Проверяем авторизацию при старте страницы
+        checkAuth();
+    </script>
 </body>
 </html>
