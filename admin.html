@@ -18,15 +18,11 @@
 </head>
 <body>
 
-    <!-- Форма отправляет данные на Netlify Forms без блокировок CORS -->
     <div class="card">
         <h2>Добавить публикацию</h2>
-        <form name="news-submissions" method="POST" data-netlify="true">
-            <!-- Скрытое поле для технической разметки Netlify -->
-            <input type="hidden" name="form-name" value="news-submissions" />
-
+        <form id="local-news-form" onsubmit="publishNews(event)">
             <label>Раздел сайта:</label>
-            <select name="section" id="post-section">
+            <select id="post-section">
                 <option value="news">Новости</option>
                 <option value="sector-legal">Правовой сектор</option>
                 <option value="sector-culture">Культурный сектор</option>
@@ -36,17 +32,42 @@
             </select>
 
             <label>Заголовок:</label>
-            <input type="text" name="title" id="post-title" placeholder="Введите заголовок" required>
+            <input type="text" id="post-title" placeholder="Введите заголовок" required>
 
             <label>Текст публикации:</label>
-            <textarea name="text" id="post-text" rows="5" placeholder="Напишите текст..." required></textarea>
+            <textarea id="post-text" rows="5" placeholder="Напишите текст..." required></textarea>
 
             <label>Ссылка на фото (необязательно):</label>
-            <input type="text" name="img" id="post-img" placeholder="https://...">
+            <input type="text" id="post-img" placeholder="https://...">
 
             <button type="submit" class="btn">Опубликовать для всех</button>
         </form>
     </div>
 
+    <script>
+        function publishNews(e) {
+            e.preventDefault();
+            const section = document.getElementById('post-section').value;
+            const title = document.getElementById('post-title').value.trim();
+            const text = document.getElementById('post-text').value.trim();
+            const img = document.getElementById('post-img').value.trim();
+
+            const newPost = {
+                section: section,
+                title: title,
+                text: text,
+                img: img,
+                date: new Date().toLocaleDateString('ru-RU')
+            };
+
+            // Сохраняем в локальную память браузера
+            let newsList = JSON.parse(localStorage.getItem('global_site_news')) || [];
+            newsList.unshift(newPost);
+            localStorage.setItem('global_site_news', JSON.stringify(newsList));
+
+            alert('Новость успешно опубликована!');
+            document.getElementById('local-news-form').reset();
+        }
+    </script>
 </body>
 </html>
