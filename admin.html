@@ -20,7 +20,7 @@
 
     <div class="card">
         <h2>Добавить публикацию</h2>
-        <form id="local-news-form" onsubmit="publishNews(event)">
+        <form id="firebase-news-form" onsubmit="publishNews(event)">
             <label>Раздел сайта:</label>
             <select id="post-section">
                 <option value="news">Новости</option>
@@ -40,19 +40,27 @@
             <label>Ссылка на фото (необязательно):</label>
             <input type="text" id="post-img" placeholder="https://...">
 
-            <button type="submit" class="btn">Опубликовать для всех</button>
+            <button type="submit" id="submit-btn" class="btn">Опубликовать для всех</button>
         </form>
     </div>
 
     <script>
-        function publishNews(e) {
+        // Ваша точная ссылка на базу данных Firebase
+        const DATABASE_URL = "https://basez-db21d-default-rtdb.firebaseio.com";
+
+        async function publishNews(e) {
             e.preventDefault();
+            const btn = document.getElementById('submit-btn');
             const section = document.getElementById('post-section').value;
             const title = document.getElementById('post-title').value.trim();
             const text = document.getElementById('post-text').value.trim();
             const img = document.getElementById('post-img').value.trim();
 
+            btn.disabled = true;
+            btn.innerText = "Публикация...";
+
             const newPost = {
+                id: Date.now().toString(),
                 section: section,
                 title: title,
                 text: text,
@@ -60,13 +68,25 @@
                 date: new Date().toLocaleDateString('ru-RU')
             };
 
-            // Сохраняем в локальную память браузера
-            let newsList = JSON.parse(localStorage.getItem('global_site_news')) || [];
-            newsList.unshift(newPost);
-            localStorage.setItem('global_site_news', JSON.stringify(newsList));
+            try {
+                const response = await fetch(`${DATABASE_URL}/posts.json`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(newPost)
+                });
 
-            alert('Новость успешно опубликована!');
-            document.getElementById('local-news-form').reset();
+                if (response.ok) {
+                    alert('Поздравляем! Новость успешно опубликована глобально для всех устройств!');
+                    document.getElementById('firebase-news-form').reset();
+                } else {
+                    alert('Ошибка базы данных. Убедитесь, что в Firebase во вкладке Rules (Правила) включен Test Mode!');
+                }
+            } catch (err) {
+                alert('Сетевая ошибка: ' + err.message);
+            } finally {
+                btn.disabled = false;
+                btn.innerText = "Опубликовать для всех";
+            }
         }
     </script>
 </body>
