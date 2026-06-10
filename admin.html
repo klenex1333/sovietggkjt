@@ -6,17 +6,27 @@
     <title>Вход в систему управления МС</title>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: system-ui, sans-serif; }
-        body { background-color: #0f172a; color: #f8fafc; display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 1.5rem; }
-        .card { background: #1e293b; padding: 2.5rem; border-radius: 16px; box-shadow: 0 15px 30px rgba(0,0,0,0.4); max-width: 450px; width: 100%; border: 1px solid rgba(255,255,255,0.05); }
+        body { background-color: #0f172a; color: #f8fafc; display: flex; flex-direction: column; justify-content: center; align-items: center; min-height: 100vh; padding: 1.5rem; }
+        .card { background: #1e293b; padding: 2.5rem; border-radius: 16px; box-shadow: 0 15px 30px rgba(0,0,0,0.4); max-width: 450px; width: 100%; border: 1px solid rgba(255,255,255,0.05); margin-bottom: 2rem; }
         h2 { font-size: 1.75rem; font-weight: 800; margin-bottom: 1.5rem; text-align: center; color: #fff; }
+        h3 { font-size: 1.3rem; font-weight: 700; margin-bottom: 1rem; color: #fff; border-bottom: 1px solid #334155; padding-bottom: 0.5rem; }
         label { display: block; font-size: 0.875rem; font-weight: 600; color: #94a3b8; margin-bottom: 0.5rem; }
         input, textarea, select { width: 100%; padding: 0.75rem 1rem; background: #0f172a; border: 1px solid #334155; border-radius: 8px; color: #fff; font-size: 0.95rem; margin-bottom: 1.25rem; transition: all 0.3s; }
         input:focus, textarea:focus, select:focus { outline: none; border-color: #2563eb; box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.2); }
         .btn { width: 100%; padding: 0.9rem; background: linear-gradient(135deg, #2563eb, #1d4ed8); color: #fff; border: none; border-radius: 8px; font-weight: 700; font-size: 1rem; cursor: pointer; transition: all 0.3s; box-shadow: 0 4px 12px rgba(37,99,235,0.3); }
         .btn:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(37,99,235,0.4); }
+        .btn:disabled { background: #334155 !important; background-image: none !important; cursor: not-allowed; transform: none; box-shadow: none; }
         .btn-logout { background: #334155; margin-top: 0.75rem; box-shadow: none; }
         .btn-logout:hover { background: #475569; box-shadow: none; }
         .hint { font-size: 0.8rem; color: #64748b; margin-top: 1rem; text-align: center; }
+        .posts-list { margin-top: 1rem; max-height: 300px; overflow-y: auto; padding-right: 5px; }
+        .post-item { background: #0f172a; padding: 1rem; border-radius: 8px; margin-bottom: 0.75rem; display: flex; justify-content: space-between; align-items: center; border: 1px solid #334155; }
+        .post-info { max-width: 75%; }
+        .post-item-title { font-weight: 600; color: #fff; font-size: 0.95rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .post-item-meta { font-size: 0.75rem; color: #64748b; margin-top: 0.25rem; }
+        .btn-delete { background: #ef4444; color: white; border: none; padding: 0.5rem 0.75rem; border-radius: 6px; font-size: 0.85rem; font-weight: 600; cursor: pointer; transition: background 0.2s; }
+        .btn-delete:hover { background: #dc2626; }
+        .no-posts { text-align: center; color: #64748b; font-size: 0.9rem; padding: 1rem 0; }
     </style>
 </head>
 <body>
@@ -24,9 +34,11 @@
     <!-- БЛОК СЕКРЕТНОГО ПАРОЛЯ -->
     <div id="auth-panel" class="card">
         <h2>Доступ ограничен</h2>
-        <label>Введите пин-код администратора:</label>
-        <input type="password" id="admin-pin" placeholder="****" autofocus>
-        <button class="btn" onclick="checkPin()">Войти</button>
+        <form onsubmit="checkPin(event)">
+            <label for="admin-pin">Введите пин-код администратора:</label>
+            <input type="password" id="admin-pin" placeholder="****" autofocus required>
+            <button type="submit" class="btn">Войти</button>
+        </form>
         <p class="hint">Нажмите Esc, чтобы вернуться на сайт</p>
     </div>
 
@@ -34,7 +46,7 @@
     <div id="cms-panel" class="card" style="display: none; max-width: 600px;">
         <h2>Добавить публикацию</h2>
         <form id="firebase-news-form" onsubmit="publishNews(event)">
-            <label>Раздел сайта:</label>
+            <label for="post-section">Раздел сайта:</label>
             <select id="post-section">
                 <option value="news">Новости</option>
                 <option value="sector-legal">Правовой сектор</option>
@@ -44,14 +56,14 @@
                 <option value="sector-household">Бытовой сектор</option>
             </select>
 
-            <label>Заголовок:</label>
+            <label for="post-title">Заголовок:</label>
             <input type="text" id="post-title" placeholder="Введите заголовок" required>
 
-            <label>Текст публикации:</label>
+            <label for="post-text">Текст публикации:</label>
             <textarea id="post-text" rows="5" placeholder="Напишите текст..." required></textarea>
 
-            <label>Ссылка на фото (необязательно):</label>
-            <input type="text" id="post-img" placeholder="https://...">
+            <label for="post-img">Ссылка на фото (необязательно):</label>
+            <input type="url" id="post-img" placeholder="https://...">
 
             <button type="submit" id="submit-btn" class="btn">Опубликовать для всех</button>
             <button type="button" class="btn btn-logout" onclick="logout()">Выйти из панели</button>
@@ -59,11 +71,20 @@
         <p class="hint">Нажмите Esc, чтобы мгновенно скрыть панель</p>
     </div>
 
+    <!-- БЛОК УДАЛЕНИЯ ПУБЛИКАЦИЙ -->
+    <div id="manage-panel" class="card" style="display: none; max-width: 600px;">
+        <h3>Управление публикациями</h3>
+        <div class="posts-list" id="posts-container">
+            <p class="no-posts">Загрузка публикаций...</p>
+        </div>
+    </div>
     <script>
-        const DATABASE_URL = "https://basez-db21d-default-rtdb.firebaseio.com";
+        const DATABASE_URL = "https://firebaseio.com";
 
-        function checkPin() {
+        function checkPin(e) {
+            if (e) e.preventDefault(); 
             const pin = document.getElementById('admin-pin').value.trim();
+            
             if (pin === "2010") {
                 localStorage.setItem('ms_admin_session', 'active');
                 showPanel();
@@ -75,21 +96,21 @@
         function showPanel() {
             document.getElementById('auth-panel').style.display = 'none';
             document.getElementById('cms-panel').style.display = 'block';
+            document.getElementById('manage-panel').style.display = 'block';
+            loadPosts(); 
         }
 
         function logout() {
             localStorage.removeItem('ms_admin_session');
-            location.reload();
+            window.location.href = "index.html"; 
         }
 
-        // СЛУШАТЕЛЬ КЛАВИШИ ESCAPE ДЛЯ МГНОВЕННОГО СКРЫТИЯ
         document.addEventListener("keydown", (e) => {
             if (e.key === "Escape" || e.key === "Esc") {
                 window.location.href = "index.html";
             }
         });
 
-        // Отправка данных формы в Firebase
         async function publishNews(e) {
             e.preventDefault();
             const btn = document.getElementById('submit-btn');
@@ -120,6 +141,7 @@
                 if (response.ok) {
                     alert('Поздравляем! Новость успешно опубликована глобально для всех устройств!');
                     document.getElementById('firebase-news-form').reset();
+                    loadPosts(); 
                 } else {
                     alert('Ошибка отправки данных в Firebase.');
                 }
@@ -128,6 +150,56 @@
             } finally {
                 btn.disabled = false;
                 btn.innerText = "Опубликовать для всех";
+            }
+        }
+
+        async function loadPosts() {
+            const container = document.getElementById('posts-container');
+            try {
+                const response = await fetch(`${DATABASE_URL}/posts.json`);
+                const data = await response.json();
+                
+                if (!data || Object.keys(data).length === 0) {
+                    container.innerHTML = '<p class="no-posts">Публикаций пока нет.</p>';
+                    return;
+                }
+
+                container.innerHTML = '';
+                const items = Object.keys(data).map(key => ({ firebaseKey: key, ...data[key] })).reverse();
+
+                items.forEach(post => {
+                    const item = document.createElement('div');
+                    item.className = 'post-item';
+                    item.innerHTML = `
+                        <div class="post-info">
+                            <div class="post-item-title">${post.title || 'Без заголовка'}</div>
+                            <div class="post-item-meta">${post.date || ''} | Раздел: ${post.section || 'Общий'}</div>
+                        </div>
+                        <button class="btn-delete" onclick="deletePost('${post.firebaseKey}')">Удалить</button>
+                    `;
+                    container.appendChild(item);
+                });
+            } catch (err) {
+                container.innerHTML = '<p class="no-posts" style="color: #ef4444;">Ошибка загрузки списка.</p>';
+            }
+        }
+
+        async function deletePost(firebaseKey) {
+            if (!confirm('Вы уверены, что хотите окончательно удалить эту публикацию?')) return;
+
+            try {
+                const response = await fetch(`${DATABASE_URL}/posts/${firebaseKey}.json`, {
+                    method: 'DELETE'
+                });
+
+                if (response.ok) {
+                    alert('Публикация успешно удалена!');
+                    loadPosts(); 
+                } else {
+                    alert('Не удалось удалить публикацию из базы данных.');
+                }
+            } catch (err) {
+                alert('Ошибка сети при удалении: ' + err.message);
             }
         }
 
