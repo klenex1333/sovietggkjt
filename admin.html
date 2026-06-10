@@ -3,11 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Вход в систему управления МС</title>
+    <title>Панель управления МС</title>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: system-ui, sans-serif; }
         body { background-color: #0f172a; color: #f8fafc; display: flex; flex-direction: column; justify-content: center; align-items: center; min-height: 100vh; padding: 1.5rem; }
-        .card { background: #1e293b; padding: 2.5rem; border-radius: 16px; box-shadow: 0 15px 30px rgba(0,0,0,0.4); max-width: 450px; width: 100%; border: 1px solid rgba(255,255,255,0.05); margin-bottom: 2rem; }
+        .card { background: #1e293b; padding: 2.5rem; border-radius: 16px; box-shadow: 0 15px 30px rgba(0,0,0,0.4); max-width: 600px; width: 100%; border: 1px solid rgba(255,255,255,0.05); margin-bottom: 2rem; }
+        #auth-panel { max-width: 450px; }
         h2 { font-size: 1.75rem; font-weight: 800; margin-bottom: 1.5rem; text-align: center; color: #fff; }
         h3 { font-size: 1.3rem; font-weight: 700; margin-bottom: 1rem; color: #fff; border-bottom: 1px solid #334155; padding-bottom: 0.5rem; }
         label { display: block; font-size: 0.875rem; font-weight: 600; color: #94a3b8; margin-bottom: 0.5rem; }
@@ -19,7 +20,7 @@
         .btn-logout { background: #334155; margin-top: 0.75rem; box-shadow: none; }
         .btn-logout:hover { background: #475569; box-shadow: none; }
         .hint { font-size: 0.8rem; color: #64748b; margin-top: 1rem; text-align: center; }
-        .posts-list { margin-top: 1rem; max-height: 300px; overflow-y: auto; padding-right: 5px; }
+        .posts-list { margin-top: 1rem; max-height: 350px; overflow-y: auto; padding-right: 5px; }
         .post-item { background: #0f172a; padding: 1rem; border-radius: 8px; margin-bottom: 0.75rem; display: flex; justify-content: space-between; align-items: center; border: 1px solid #334155; }
         .post-info { max-width: 75%; }
         .post-item-title { font-weight: 600; color: #fff; font-size: 0.95rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -31,22 +32,20 @@
 </head>
 <body>
 
-    <!-- БЛОК СЕКРЕТНОГО ПАРОЛЯ -->
     <div id="auth-panel" class="card">
         <h2>Доступ ограничен</h2>
         <form onsubmit="checkPin(event)">
-            <label for="admin-pin">Введите пин-код администратора:</label>
+            <label>Введите пин-код администратора:</label>
             <input type="password" id="admin-pin" placeholder="****" autofocus required>
             <button type="submit" class="btn">Войти</button>
         </form>
         <p class="hint">Нажмите Esc, чтобы вернуться на сайт</p>
     </div>
 
-    <!-- ИНТЕРФЕЙС ДОБАВЛЕНИЯ НОВОСТЕЙ -->
-    <div id="cms-panel" class="card" style="display: none; max-width: 600px;">
+    <div id="cms-panel" class="card" style="display: none;">
         <h2>Добавить публикацию</h2>
         <form id="firebase-news-form" onsubmit="publishNews(event)">
-            <label for="post-section">Раздел сайта:</label>
+            <label>Раздел сайта:</label>
             <select id="post-section">
                 <option value="news">Новости</option>
                 <option value="sector-legal">Правовой сектор</option>
@@ -56,13 +55,13 @@
                 <option value="sector-household">Бытовой сектор</option>
             </select>
 
-            <label for="post-title">Заголовок:</label>
+            <label>Заголовок:</label>
             <input type="text" id="post-title" placeholder="Введите заголовок" required>
 
-            <label for="post-text">Текст публикации:</label>
+            <label>Текст публикации:</label>
             <textarea id="post-text" rows="5" placeholder="Напишите текст..." required></textarea>
 
-            <label for="post-img">Ссылка на фото (необязательно):</label>
+            <label>Ссылка на фото (необязательно):</label>
             <input type="url" id="post-img" placeholder="https://...">
 
             <button type="submit" id="submit-btn" class="btn">Опубликовать для всех</button>
@@ -71,160 +70,27 @@
         <p class="hint">Нажмите Esc, чтобы мгновенно скрыть панель</p>
     </div>
 
-    <!-- БЛОК УДАЛЕНИЯ ПУБЛИКАЦИЙ -->
-    <div id="manage-panel" class="card" style="display: none; max-width: 600px;">
+    <div id="manage-panel" class="card" style="display: none;">
         <h3>Управление публикациями</h3>
         <div class="posts-list" id="posts-container">
             <p class="no-posts">Загрузка публикаций...</p>
         </div>
     </div>
-       <script>
-        const DATABASE_URL = "https://basez-db21d-default-rtdb.firebaseio.com";
-
-        function checkPin(e) {
-            if (e) e.preventDefault(); 
-            const pin = document.getElementById('admin-pin').value.trim();
-            
-            if (pin === "2010") {
-                localStorage.setItem('ms_admin_session', 'active');
-                showPanel();
-            } else {
-                alert('Неверный пин-код доступа!');
-            }
-        }
-
-        function showPanel() {
-            // ИСПРАВЛЕНО: Сначала делаем блоки видимыми в DOM
-            document.getElementById('auth-panel').style.display = 'none';
-            document.getElementById('cms-panel').style.display = 'block';
-            document.getElementById('manage-panel').style.display = 'block';
-            
-            // И только после этого запрашиваем публикации из сети
-            setTimeout(loadPosts, 50); 
-        }
-
-        function logout() {
-            localStorage.removeItem('ms_admin_session');
-            window.location.href = "index.html"; 
-        }
-
-        document.addEventListener("keydown", (e) => {
-            if (e.key === "Escape" || e.key === "Esc") {
-                window.location.href = "index.html";
-            }
-        });
-
-        async function publishNews(e) {
-            e.preventDefault();
-            const btn = document.getElementById('submit-btn');
-            const section = document.getElementById('post-section').value;
-            const title = document.getElementById('post-title').value.trim();
-            const text = document.getElementById('post-text').value.trim();
-            const img = document.getElementById('post-img').value.trim();
-
-            btn.disabled = true;
-            btn.innerText = "Публикация...";
-
-            const newPost = {
-                id: Date.now().toString(),
-                section: section,
-                title: title,
-                text: text,
-                img: img,
-                date: new Date().toLocaleDateString('ru-RU')
-            };
-
-            try {
-                const response = await fetch(`${DATABASE_URL}/posts.json`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(newPost)
-                });
-
-                if (response.ok) {
-                    alert('Поздравляем! Новость успешно опубликована глобально для всех устройств!');
-                    document.getElementById('firebase-news-form').reset();
-                    loadPosts(); 
-                } else {
-                    alert('Ошибка отправки данных в Firebase.');
-                }
-            } catch (err) {
-                alert('Сетевая ошибка: ' + err.message);
-            } finally {
-                btn.disabled = false;
-                btn.innerText = "Опубликовать для всех";
-            }
-        }
-
-        async function loadPosts() {
-            const container = document.getElementById('posts-container');
-            if (!container) return; // Защита от ошибок, если контейнер еще не создался
-
-            try {
-                const response = await fetch(`${DATABASE_URL}/posts.json`);
-                const data = await response.json();
-                
-                // Проверяем, пустая ли база данных
-                if (!data || Object.keys(data).length === 0) {
-                    container.innerHTML = '<p class="no-posts">Публикаций пока нет.</p>';
-                    return;
-                }
-
-                container.innerHTML = '';
-                // Трансформируем объект из Firebase в массив и переворачиваем, чтобы новые были вверху
-                const items = Object.keys(data).map(key => ({ firebaseKey: key, ...data[key] })).reverse();
-
-                items.forEach(post => {
-                    const item = document.createElement('div');
-                    item.className = 'post-item';
-                    item.innerHTML = `
-                        <div class="post-info">
-                            <div class="post-item-title">${post.title || 'Без заголовка'}</div>
-                            <div class="post-item-meta">${post.date || ''} | Раздел: ${post.section || 'Общий'}</div>
-                        </div>
-                        <button class="btn-delete" onclick="deletePost('${post.firebaseKey}')">Удалить</button>
-                    `;
-                    container.appendChild(item);
-                });
-            } catch (err) {
-                container.innerHTML = '<p class="no-posts" style="color: #ef4444;">Ошибка загрузки списка.</p>';
-                console.error("Ошибка Firebase:", err);
-            }
-        }
-
-        async function deletePost(firebaseKey) {
-            if (!confirm('Вы уверены, что хотите окончательно удалить эту публикацию?')) return;
-
-            try {
-                const response = await fetch(`${DATABASE_URL}/posts/${firebaseKey}.json`, {
-                    method: 'DELETE'
-                });
-
-                if (response.ok) {
-                    alert('Публикация успешно удалена!');
-                    loadPosts(); 
-                } else {
-                    alert('Не удалось удалить публикацию из базы данных.');
-                }
-            } catch (err) {
-                alert('Ошибка сети при удалении: ' + err.message);
-            }
-        }
-
-        // Проверка сохраненной сессии при загрузке страницы
-        if (localStorage.getItem('ms_admin_session') === 'active') {
-            showPanel();
-        }
-    </script>
-</body>
-</html>
     <script>
-        const DATABASE_URL = "https://basez-db21d-default-rtdb.firebaseio.com";
+        const DATABASE_URL = "https://firebaseio.com";
+
+        const SECTIONS_DICT = {
+            "news": "Новости",
+            "sector-legal": "Правовой сектор",
+            "sector-culture": "Культурный сектор",
+            "sector-sport": "Спортивный сектор",
+            "sector-info": "Информационный сектор",
+            "sector-household": "Бытовой сектор"
+        };
 
         function checkPin(e) {
             if (e) e.preventDefault(); 
             const pin = document.getElementById('admin-pin').value.trim();
-            
             if (pin === "2010") {
                 localStorage.setItem('ms_admin_session', 'active');
                 showPanel();
@@ -234,13 +100,10 @@
         }
 
         function showPanel() {
-            // ИСПРАВЛЕНО: Сначала делаем блоки видимыми в DOM
             document.getElementById('auth-panel').style.display = 'none';
             document.getElementById('cms-panel').style.display = 'block';
             document.getElementById('manage-panel').style.display = 'block';
-            
-            // И только после этого запрашиваем публикации из сети
-            setTimeout(loadPosts, 50); 
+            loadPosts(); 
         }
 
         function logout() {
@@ -265,8 +128,9 @@
             btn.disabled = true;
             btn.innerText = "Публикация...";
 
+            const postId = Date.now().toString(); 
             const newPost = {
-                id: Date.now().toString(),
+                id: postId,
                 section: section,
                 title: title,
                 text: text,
@@ -275,14 +139,14 @@
             };
 
             try {
-                const response = await fetch(`${DATABASE_URL}/posts.json`, {
-                    method: 'POST',
+                const response = await fetch(`${DATABASE_URL}/posts/${postId}.json`, {
+                    method: 'PUT',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(newPost)
                 });
 
                 if (response.ok) {
-                    alert('Поздравляем! Новость успешно опубликована глобально для всех устройств!');
+                    alert('Поздравляем! Новость успешно опубликована!');
                     document.getElementById('firebase-news-form').reset();
                     loadPosts(); 
                 } else {
@@ -298,45 +162,44 @@
 
         async function loadPosts() {
             const container = document.getElementById('posts-container');
-            if (!container) return; // Защита от ошибок, если контейнер еще не создался
+            if (!container) return;
 
             try {
                 const response = await fetch(`${DATABASE_URL}/posts.json`);
                 const data = await response.json();
                 
-                // Проверяем, пустая ли база данных
                 if (!data || Object.keys(data).length === 0) {
                     container.innerHTML = '<p class="no-posts">Публикаций пока нет.</p>';
                     return;
                 }
 
                 container.innerHTML = '';
-                // Трансформируем объект из Firebase в массив и переворачиваем, чтобы новые были вверху
-                const items = Object.keys(data).map(key => ({ firebaseKey: key, ...data[key] })).reverse();
+                const items = Object.keys(data).map(key => data[key]).reverse();
 
                 items.forEach(post => {
+                    if (!post || !post.id) return;
                     const item = document.createElement('div');
                     item.className = 'post-item';
+                    const secName = SECTIONS_DICT[post.section] || "Новости";
                     item.innerHTML = `
                         <div class="post-info">
                             <div class="post-item-title">${post.title || 'Без заголовка'}</div>
-                            <div class="post-item-meta">${post.date || ''} | Раздел: ${post.section || 'Общий'}</div>
+                            <div class="post-item-meta">${post.date || ''} | ${secName}</div>
                         </div>
-                        <button class="btn-delete" onclick="deletePost('${post.firebaseKey}')">Удалить</button>
+                        <button class="btn-delete" onclick="deletePost('${post.id}')">Удалить</button>
                     `;
                     container.appendChild(item);
                 });
             } catch (err) {
                 container.innerHTML = '<p class="no-posts" style="color: #ef4444;">Ошибка загрузки списка.</p>';
-                console.error("Ошибка Firebase:", err);
             }
         }
 
-        async function deletePost(firebaseKey) {
+        async function deletePost(postId) {
             if (!confirm('Вы уверены, что хотите окончательно удалить эту публикацию?')) return;
 
             try {
-                const response = await fetch(`${DATABASE_URL}/posts/${firebaseKey}.json`, {
+                const response = await fetch(`${DATABASE_URL}/posts/${postId}.json`, {
                     method: 'DELETE'
                 });
 
@@ -344,14 +207,13 @@
                     alert('Публикация успешно удалена!');
                     loadPosts(); 
                 } else {
-                    alert('Не удалось удалить публикацию из базы данных.');
+                    alert('Не удалось удалить публикацию.');
                 }
             } catch (err) {
-                alert('Ошибка сети при удалении: ' + err.message);
+                alert('Ошибка сети: ' + err.message);
             }
         }
 
-        // Проверка сохраненной сессии при загрузке страницы
         if (localStorage.getItem('ms_admin_session') === 'active') {
             showPanel();
         }
