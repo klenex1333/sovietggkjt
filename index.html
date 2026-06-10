@@ -109,51 +109,57 @@
     <footer>
         <p>&copy; 2024 Молодёжный Совет ГГКЖТ. Все права защищены.</p>
     </footer>
-
-    <!-- СКРИПТЫ: ЧТЕНИЕ FIREBASE И ГОРЯЧАЯ КЛАВИША Ё -->
     <script>
-        document.addEventListener("DOMContentLoaded", () => {
-            const newsContainer = document.getElementById("news-container");
-            const DATABASE_URL = "https://firebaseio.com";
+    document.addEventListener("DOMContentLoaded", () => {
+        const newsContainer = document.getElementById("news-container");
+        
+        // Вставь сюда ТУ ЖЕ ссылку, которую ты вставил в админку (БЕЗ слэша на конце)
+        const DATABASE_URL = "https://basez-db21d-default-rtdb.firebaseio.com";
 
-            fetch(`${DATABASE_URL}/posts.json`)
-                .then(res => res.ok ? res.json() : null)
-                .then(data => {
-                    if (!data) {
-                        newsContainer.innerHTML = '<p class="no-news">Пока новостей нет. Зайдите позже!</p>';
-                        return;
-                    }
-
-                    // Собираем массив и фильтруем только новости
-                    const newsPosts = Object.keys(data).map(key => data[key]).filter(p => p.section === "news");
-                    newsPosts.reverse();
-
-                    if (newsPosts.length === 0) {
-                        newsContainer.innerHTML = '<p class="no-news">Пока новостей нет. Зайдите позже!</p>';
-                        return;
-                    }
-
-                    newsContainer.innerHTML = "";
-                    newsPosts.forEach(post => {
-                        const card = document.createElement("div");
-                        card.className = "news-card";
-                        const imgHtml = post.img ? `<img src="${post.img}" alt="${post.title}" class="news-img">` : "";
-                        card.innerHTML = `${imgHtml}<div class="news-content"><h3>${post.title}</h3><p>${post.text}</p></div>`;
-                        newsContainer.appendChild(card);
-                    });
-                })
-                .catch(err => {
-                    console.error(err);
+        fetch(`${DATABASE_URL}/posts.json`)
+            .then(res => res.ok ? res.json() : null)
+            .then(data => {
+                if (!data) {
                     newsContainer.innerHTML = '<p class="no-news">Пока новостей нет. Зайдите позже!</p>';
-                });
-        });
+                    return;
+                }
 
-        // СЕКРЕТНЫЙ ВЫЗОВ АДМИНКИ НА КЛАВИШУ Ё (~)
-        document.addEventListener("keydown", (e) => {
-            if (e.key === "ё" || e.key === "Ё" || e.key === "`" || e.key === "~") {
-                window.location.href = "admin.html";
-            }
-        });
-    </script>
+                // Превращаем объект Firebase в массив всех публикаций
+                const allPosts = Object.keys(data).map(key => data[key]);
+                
+                // Переворачиваем, чтобы новые посты были вверху
+                allPosts.reverse();
+
+                if (allPosts.length === 0) {
+                    newsContainer.innerHTML = '<p class="no-news">Пока новостей нет. Зайдите позже!</p>';
+                    return;
+                }
+
+                newsContainer.innerHTML = "";
+                allPosts.forEach(post => {
+                    const card = document.createElement("div");
+                    card.className = "news-card";
+                    
+                    // Проверяем наличие картинки
+                    const imgHtml = post.img ? `<img src="${post.img}" alt="${post.title}" class="news-img">` : "";
+                    
+                    // Выводим карточку на сайт
+                    card.innerHTML = `${imgHtml}<div class="news-content"><h3>${post.title}</h3><p>${post.text}</p></div>`;
+                    newsContainer.appendChild(card);
+                });
+            })
+            .catch(err => {
+                console.error(err);
+                newsContainer.innerHTML = '<p class="no-news">Ошибка загрузки данных. Попробуйте позже!</p>';
+            });
+    });
+
+    // СЕКРЕТНЫЙ ВЫЗОВ АДМИНКИ НА КЛАВИШУ Ё (~)
+    document.addEventListener("keydown", (e) => {
+        if (e.key === "ё" || e.key === "Ё" || e.key === "`" || e.key === "~") {
+            window.location.href = "admin.html";
+        }
+    });
+</script>
 </body>
 </html>
