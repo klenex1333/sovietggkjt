@@ -83,11 +83,17 @@
         <!-- ОТСТУП МЕЖДУ РАЗДЕЛАМИ -->
         <div style="height: 120px; width: 100%;"></div>
 
-        <!-- СЕКЦИЯ: НОВОСТИ -->
-        <section id="news" class="news-section">
-            <h2>Последние новости</h2>
+                <!-- СЕКЦИЯ: НОВОСТИ С ИНТЕРАКТИВНЫМ МЕНЮ СЕКТОРОВ -->
+        <section id="news" class="news-section" style="scroll-margin-top: 2rem;">
+            <!-- Динамический заголовок, который меняется при выборе сектора -->
+            <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #334155; padding-bottom: 0.75rem; margin-bottom: 2rem; flex-wrap: wrap; gap: 1rem;">
+                <h2 id="news-section-title" style="margin: 0;">Последние новости</h2>
+                <button id="reset-news-filter" onclick="filterNewsBySector('all')" style="display: none; background: #334155; color: #cbd5e1; border: none; padding: 0.5rem 1rem; border-radius: 6px; font-size: 0.9rem; font-weight: 600; cursor: pointer; transition: background 0.2s;">Показать все новости</button>
+            </div>
+            
+            <!-- Сюда скрипт будет выводить карточки новостей -->
             <div id="news-container" class="news-grid">
-                <p class="no-news">Пока новостей нет. Зайдите позже!</p>
+                <p class="no-news">Загрузка новостей...</p>
             </div>
         </section>
 
@@ -107,59 +113,164 @@
     </main>
 
     <footer>
-        <p>&copy; 2024 Молодёжный Совет ГГКЖТ. Все права защищены.</p>
+        <p>&copy; 2026 Молодёжный Совет ГГКЖТ. Все права защищены.</p>
     </footer>
-    <script>
-    document.addEventListener("DOMContentLoaded", () => {
-        const newsContainer = document.getElementById("news-container");
-        
-        // Вставь сюда ТУ ЖЕ ссылку, которую ты вставил в админку (БЕЗ слэша на конце)
-        const DATABASE_URL = "https://basez-db21d-default-rtdb.firebaseio.com";
+        <script>
+        const DATABASE_URL = "https://firebaseio.com";
+        let localPostsStorage = []; // Глобальный массив для хранения загруженных постов
 
-        fetch(`${DATABASE_URL}/posts.json`)
-            .then(res => res.ok ? res.json() : null)
-            .then(data => {
-                if (!data) {
-                    newsContainer.innerHTML = '<p class="no-news">Пока новостей нет. Зайдите позже!</p>';
-                    return;
+        const SECTOR_TRANSLATIONS = {
+            "news": "Новости",
+            "sector-legal": "Правовой сектор",
+            "sector-culture": "Культурный сектор",
+            "sector-sport": "Спортивный сектор",
+            "sector-info": "Информационный сектор",
+            "sector-household": "Бытовой сектор"
+        };
+
+        document.addEventListener("DOMContentLoaded", () => {
+            // Навешиваем клики на карточки секторов, которые находятся вверху вашей страницы
+            setupSectorCardsClicks();
+            // Загружаем публикации из базы данных Firebase
+            loadGlobalNews();
+        });
+
+        // Шаг 1: Автоматически находим карточки секторов из вашей верхней секции и учим их реагировать на клик
+        function setupSectorCardsClicks() {
+            const cards = document.querySelectorAll(".sector-card");
+            const sectorIds = ["sector-legal", "sector-culture", "sector-sport", "sector-info", "sector-household"];
+            
+            cards.forEach((card, index) => {
+                if(sectorIds[index]) {
+                    card.style.cursor = "pointer";
+                    card.addEventListener("click", () => {
+                        // Убираем активный класс у всех и добавляем нажатой карточке
+                        cards.forEach(c => c.style.background = "");
+                        card.style.background = "#243249"; 
+                        
+                        // Запускаем фильтрацию новостной ленты внизу
+                        filterNewsBySector(sectorIds[index]);
+                    });
                 }
-
-                // Превращаем объект Firebase в массив всех публикаций
-                const allPosts = Object.keys(data).map(key => data[key]);
-                
-                // Переворачиваем, чтобы новые посты были вверху
-                allPosts.reverse();
-
-                if (allPosts.length === 0) {
-                    newsContainer.innerHTML = '<p class="no-news">Пока новостей нет. Зайдите позже!</p>';
-                    return;
-                }
-
-                newsContainer.innerHTML = "";
-                allPosts.forEach(post => {
-                    const card = document.createElement("div");
-                    card.className = "news-card";
-                    
-                    // Проверяем наличие картинки
-                    const imgHtml = post.img ? `<img src="${post.img}" alt="${post.title}" class="news-img">` : "";
-                    
-                    // Выводим карточку на сайт
-                    card.innerHTML = `${imgHtml}<div class="news-content"><h3>${post.title}</h3><p>${post.text}</p></div>`;
-                    newsContainer.appendChild(card);
-                });
-            })
-            .catch(err => {
-                console.error(err);
-                newsContainer.innerHTML = '<p class="no-news">Ошибка загрузки данных. Попробуйте позже!</p>';
             });
-    });
-
-    // СЕКРЕТНЫЙ ВЫЗОВ АДМИНКИ НА КЛАВИШУ Ё (~)
-    document.addEventListener("keydown", (e) => {
-        if (e.key === "ё" || e.key === "Ё" || e.key === "`" || e.key === "~") {
-            window.location.href = "admin.html";
         }
-    });
-</script>
+
+        // Шаг 2: Загрузка новостей из Firebase
+        async function loadGlobalNews() {
+            const newsContainer = document.getElementById("news-container");
+            try {
+                const res = await fetch(`${DATABASE_URL}/posts.json`);
+                const data = await res.json();
+                
+                if (!data || Object.keys(data).length === 0) {
+                    newsContainer.innerHTML = '<p class="no-news">Пока новостей нет. Зайдите позже!</p>';
+                    return;
+                }
+
+                // Превращаем объект в массив и разворачиваем, чтобы новые записи были вверху
+                localPostsStorage = Object.keys(data).map(key => data[key]).reverse();
+                renderFilteredNews("all");
+
+            } catch (err) {
+                console.error("Ошибка загрузки:", err);
+                newsContainer.innerHTML = '<p class="no-news">Ошибка загрузки данных. Попробуйте позже!</p>';
+            }
+        }
+
+        // Шаг 3: Фильтрация массива и отрисовка карточек-аккордеонов
+        function renderFilteredNews(sectorId) {
+            const newsContainer = document.getElementById("news-container");
+            if (!newsContainer) return;
+
+            // Отбираем посты для текущего выбранного меню
+            const displayedPosts = sectorId === "all" 
+                ? localPostsStorage 
+                : localPostsStorage.filter(post => post.section === sectorId);
+
+            if (displayedPosts.length === 0) {
+                newsContainer.innerHTML = '<p class="no-news">В этом разделе публикаций пока нет.</p>';
+                return;
+            }
+
+            newsContainer.innerHTML = "";
+            displayedPosts.forEach(post => {
+                const card = document.createElement("div");
+                // Добавляем встроенные стили для аккуратного скрытия текста (аккордеона)
+                card.className = "news-card";
+                card.style.background = "#1e293b";
+                card.style.borderRadius = "12px";
+                card.style.overflow = "hidden";
+                card.style.marginBottom = "1.5rem";
+                card.style.border = "1px solid rgba(255,255,255,0.05)";
+                card.style.cursor = "pointer";
+
+                const imgHtml = post.img ? `<img src="${post.img}" alt="${post.title}" class="news-img" style="width:100%; max-height:300px; object-fit:cover; display:block;">` : "";
+                const currentSectorName = SECTOR_TRANSLATIONS[post.section] || "Общий раздел";
+
+                // Шапочка видна всегда, а тело (news-body) изначально имеет высоту 0px
+                card.innerHTML = `
+                    <div class="news-header" style="padding: 1.5rem; user-select: none;">
+                        <h3 style="color:#fff; margin:0 0 0.5rem 0; font-size:1.25rem;">${post.title}</h3>
+                        <span style="font-size:0.8rem; color:#64748b;">${post.date || ''} | Раздел: ${currentSectorName}</span>
+                        <span class="arrow-indicator" style="float:right; color:#2563eb; transition: transform 0.3s;">▼ Читать</span>
+                    </div>
+                    <div class="news-body" style="max-height: 0px; overflow: hidden; transition: max-height 0.3s ease-out; background:#131c2e;">
+                        <div style="padding: 1.5rem; color:#cbd5e1; line-height:1.6; white-space:pre-wrap;">
+                            ${post.text}
+                            ${imgHtml}
+                        </div>
+                    </div>
+                `;
+
+                // Логика раскрытия аккордеона по клику на карточку новостей
+                card.addEventListener("click", function(e) {
+                    const body = this.querySelector(".news-body");
+                    const arrow = this.querySelector(".arrow-indicator");
+                    
+                    if (body.style.maxHeight === "0px" || !body.style.maxHeight) {
+                        body.style.maxHeight = body.scrollHeight + "px";
+                        arrow.style.transform = "rotate(180deg)";
+                        arrow.innerText = "▲ Свернуть";
+                    } else {
+                        body.style.maxHeight = "0px";
+                        arrow.style.transform = "rotate(0deg)";
+                        arrow.innerText = "▼ Читать";
+                    }
+                });
+
+                newsContainer.appendChild(card);
+            });
+        }
+
+        // Переключение меню при клике на сектора
+        function filterNewsBySector(sectorId) {
+            const titleElement = document.getElementById("news-section-title");
+            const resetBtn = document.getElementById("reset-news-filter");
+
+            if (sectorId === "all") {
+                titleElement.innerText = "Последние новости";
+                resetBtn.style.display = "none";
+                // Сбрасываем подсветку с карточек секторов вверху страницы
+                document.querySelectorAll(".sector-card").forEach(c => c.style.background = "");
+            } else {
+                const sectorName = SECTOR_TRANSLATIONS[sectorId] || "Раздел";
+                titleElement.innerText = `Новости: ${sectorName}`;
+                resetBtn.style.display = "inline-block";
+            }
+
+            // Перерисовываем карточки
+            renderFilteredNews(sectorId);
+
+            // Плавно скроллим пользователя вниз к началу новостной ленты
+            document.getElementById("news").scrollIntoView({ behavior: "smooth", block: "start" });
+        }
+
+        // СЕКРЕТНЫЙ ВЫЗОВ АДМИНКИ НА КЛАВИШУ Ё (~)
+        document.addEventListener("keydown", (e) => {
+            if (e.key === "ё" || e.key === "Ё" || e.key === "`" || e.key === "~") {
+                window.location.href = "admin.html";
+            }
+        });
+    </script>
 </body>
 </html>
