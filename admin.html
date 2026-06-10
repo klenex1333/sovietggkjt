@@ -78,8 +78,8 @@
             <p class="no-posts">Загрузка публикаций...</p>
         </div>
     </div>
-    <script>
-        const DATABASE_URL = "https://firebaseio.com";
+       <script>
+        const DATABASE_URL = "https://basez-db21d-default-rtdb.firebaseio.com";
 
         function checkPin(e) {
             if (e) e.preventDefault(); 
@@ -94,10 +94,13 @@
         }
 
         function showPanel() {
+            // ИСПРАВЛЕНО: Сначала делаем блоки видимыми в DOM
             document.getElementById('auth-panel').style.display = 'none';
             document.getElementById('cms-panel').style.display = 'block';
             document.getElementById('manage-panel').style.display = 'block';
-            loadPosts(); 
+            
+            // И только после этого запрашиваем публикации из сети
+            setTimeout(loadPosts, 50); 
         }
 
         function logout() {
@@ -155,16 +158,20 @@
 
         async function loadPosts() {
             const container = document.getElementById('posts-container');
+            if (!container) return; // Защита от ошибок, если контейнер еще не создался
+
             try {
                 const response = await fetch(`${DATABASE_URL}/posts.json`);
                 const data = await response.json();
                 
+                // Проверяем, пустая ли база данных
                 if (!data || Object.keys(data).length === 0) {
                     container.innerHTML = '<p class="no-posts">Публикаций пока нет.</p>';
                     return;
                 }
 
                 container.innerHTML = '';
+                // Трансформируем объект из Firebase в массив и переворачиваем, чтобы новые были вверху
                 const items = Object.keys(data).map(key => ({ firebaseKey: key, ...data[key] })).reverse();
 
                 items.forEach(post => {
@@ -181,6 +188,7 @@
                 });
             } catch (err) {
                 container.innerHTML = '<p class="no-posts" style="color: #ef4444;">Ошибка загрузки списка.</p>';
+                console.error("Ошибка Firebase:", err);
             }
         }
 
@@ -203,6 +211,147 @@
             }
         }
 
+        // Проверка сохраненной сессии при загрузке страницы
+        if (localStorage.getItem('ms_admin_session') === 'active') {
+            showPanel();
+        }
+    </script>
+</body>
+</html>
+    <script>
+        const DATABASE_URL = "https://basez-db21d-default-rtdb.firebaseio.com";
+
+        function checkPin(e) {
+            if (e) e.preventDefault(); 
+            const pin = document.getElementById('admin-pin').value.trim();
+            
+            if (pin === "2010") {
+                localStorage.setItem('ms_admin_session', 'active');
+                showPanel();
+            } else {
+                alert('Неверный пин-код доступа!');
+            }
+        }
+
+        function showPanel() {
+            // ИСПРАВЛЕНО: Сначала делаем блоки видимыми в DOM
+            document.getElementById('auth-panel').style.display = 'none';
+            document.getElementById('cms-panel').style.display = 'block';
+            document.getElementById('manage-panel').style.display = 'block';
+            
+            // И только после этого запрашиваем публикации из сети
+            setTimeout(loadPosts, 50); 
+        }
+
+        function logout() {
+            localStorage.removeItem('ms_admin_session');
+            window.location.href = "index.html"; 
+        }
+
+        document.addEventListener("keydown", (e) => {
+            if (e.key === "Escape" || e.key === "Esc") {
+                window.location.href = "index.html";
+            }
+        });
+
+        async function publishNews(e) {
+            e.preventDefault();
+            const btn = document.getElementById('submit-btn');
+            const section = document.getElementById('post-section').value;
+            const title = document.getElementById('post-title').value.trim();
+            const text = document.getElementById('post-text').value.trim();
+            const img = document.getElementById('post-img').value.trim();
+
+            btn.disabled = true;
+            btn.innerText = "Публикация...";
+
+            const newPost = {
+                id: Date.now().toString(),
+                section: section,
+                title: title,
+                text: text,
+                img: img,
+                date: new Date().toLocaleDateString('ru-RU')
+            };
+
+            try {
+                const response = await fetch(`${DATABASE_URL}/posts.json`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(newPost)
+                });
+
+                if (response.ok) {
+                    alert('Поздравляем! Новость успешно опубликована глобально для всех устройств!');
+                    document.getElementById('firebase-news-form').reset();
+                    loadPosts(); 
+                } else {
+                    alert('Ошибка отправки данных в Firebase.');
+                }
+            } catch (err) {
+                alert('Сетевая ошибка: ' + err.message);
+            } finally {
+                btn.disabled = false;
+                btn.innerText = "Опубликовать для всех";
+            }
+        }
+
+        async function loadPosts() {
+            const container = document.getElementById('posts-container');
+            if (!container) return; // Защита от ошибок, если контейнер еще не создался
+
+            try {
+                const response = await fetch(`${DATABASE_URL}/posts.json`);
+                const data = await response.json();
+                
+                // Проверяем, пустая ли база данных
+                if (!data || Object.keys(data).length === 0) {
+                    container.innerHTML = '<p class="no-posts">Публикаций пока нет.</p>';
+                    return;
+                }
+
+                container.innerHTML = '';
+                // Трансформируем объект из Firebase в массив и переворачиваем, чтобы новые были вверху
+                const items = Object.keys(data).map(key => ({ firebaseKey: key, ...data[key] })).reverse();
+
+                items.forEach(post => {
+                    const item = document.createElement('div');
+                    item.className = 'post-item';
+                    item.innerHTML = `
+                        <div class="post-info">
+                            <div class="post-item-title">${post.title || 'Без заголовка'}</div>
+                            <div class="post-item-meta">${post.date || ''} | Раздел: ${post.section || 'Общий'}</div>
+                        </div>
+                        <button class="btn-delete" onclick="deletePost('${post.firebaseKey}')">Удалить</button>
+                    `;
+                    container.appendChild(item);
+                });
+            } catch (err) {
+                container.innerHTML = '<p class="no-posts" style="color: #ef4444;">Ошибка загрузки списка.</p>';
+                console.error("Ошибка Firebase:", err);
+            }
+        }
+
+        async function deletePost(firebaseKey) {
+            if (!confirm('Вы уверены, что хотите окончательно удалить эту публикацию?')) return;
+
+            try {
+                const response = await fetch(`${DATABASE_URL}/posts/${firebaseKey}.json`, {
+                    method: 'DELETE'
+                });
+
+                if (response.ok) {
+                    alert('Публикация успешно удалена!');
+                    loadPosts(); 
+                } else {
+                    alert('Не удалось удалить публикацию из базы данных.');
+                }
+            } catch (err) {
+                alert('Ошибка сети при удалении: ' + err.message);
+            }
+        }
+
+        // Проверка сохраненной сессии при загрузке страницы
         if (localStorage.getItem('ms_admin_session') === 'active') {
             showPanel();
         }
