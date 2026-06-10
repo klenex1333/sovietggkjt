@@ -115,9 +115,18 @@
     <footer>
         <p>&copy; 2026 Молодёжный Совет ГГКЖТ. Все права защищены.</p>
     </footer>
-        <script>
+           <script>
         const DATABASE_URL = "https://firebaseio.com";
-        let localPostsStorage = []; // Глобальный массив для хранения загруженных постов
+        let localPostsStorage = []; 
+
+        // ИСПРАВЛЕНО: Строгое соответствие порядка секторов вашей HTML-разметке
+        const SECTOR_IDS_MAP = [
+            "sector-legal",     // 1. Правовой
+            "sector-culture",   // 2. Культурный
+            "sector-sport",     // 3. Спортивный
+            "sector-info",      // 4. Информационный
+            "sector-household"  // 5. Бытовой
+        ];
 
         const SECTOR_TRANSLATIONS = {
             "news": "Новости",
@@ -129,37 +138,37 @@
         };
 
         document.addEventListener("DOMContentLoaded", () => {
-            // Навешиваем клики на карточки секторов, которые находятся вверху вашей страницы
             setupSectorCardsClicks();
-            // Загружаем публикации из базы данных Firebase
             loadGlobalNews();
         });
 
-        // Шаг 1: Автоматически находим карточки секторов из вашей верхней секции и учим их реагировать на клик
+        // Шаг 1: Привязка кликов к карточкам
         function setupSectorCardsClicks() {
             const cards = document.querySelectorAll(".sector-card");
-            const sectorIds = ["sector-legal", "sector-culture", "sector-sport", "sector-info", "sector-household"];
             
             cards.forEach((card, index) => {
-                if(sectorIds[index]) {
+                const targetSector = SECTOR_IDS_MAP[index];
+                if (targetSector) {
                     card.style.cursor = "pointer";
                     card.addEventListener("click", () => {
-                        // Убираем активный класс у всех и добавляем нажатой карточке
                         cards.forEach(c => c.style.background = "");
                         card.style.background = "#243249"; 
-                        
-                        // Запускаем фильтрацию новостной ленты внизу
-                        filterNewsBySector(sectorIds[index]);
+                        filterNewsBySector(targetSector);
                     });
                 }
             });
         }
 
-        // Шаг 2: Загрузка новостей из Firebase
+        // Шаг 2: Безопасная загрузка новостей
         async function loadGlobalNews() {
             const newsContainer = document.getElementById("news-container");
             try {
                 const res = await fetch(`${DATABASE_URL}/posts.json`);
+                
+                if (!res.ok) {
+                    throw new Error(`Ошибка сервера: ${res.status}`);
+                }
+                
                 const data = await res.json();
                 
                 if (!data || Object.keys(data).length === 0) {
@@ -167,25 +176,32 @@
                     return;
                 }
 
-                // Превращаем объект в массив и разворачиваем, чтобы новые записи были вверху
-                localPostsStorage = Object.keys(data).map(key => data[key]).reverse();
+                // ИСПРАВЛЕНО: Защита от пустых или битых записей в базе данных
+                localPostsStorage = Object.keys(data)
+                    .map(key => ({ firebaseKey: key, ...data[key] }))
+                    .filter(post => post && (post.title || post.text))
+                    .reverse();
+
                 renderFilteredNews("all");
 
             } catch (err) {
-                console.error("Ошибка загрузки:", err);
+                console.error("Критическая ошибка Firebase:", err);
                 newsContainer.innerHTML = '<p class="no-news">Ошибка загрузки данных. Попробуйте позже!</p>';
             }
         }
 
-        // Шаг 3: Фильтрация массива и отрисовка карточек-аккордеонов
+        // Шаг 3: Отрисовка карточек с автоматической поддержкой старых новостей
         function renderFilteredNews(sectorId) {
             const newsContainer = document.getElementById("news-container");
             if (!newsContainer) return;
 
-            // Отбираем посты для текущего выбранного меню
+            // ИСПРАВЛЕНО: Старые новости без указанного сектора теперь автоматически относятся к категории "news"
             const displayedPosts = sectorId === "all" 
                 ? localPostsStorage 
-                : localPostsStorage.filter(post => post.section === sectorId);
+                : localPostsStorage.filter(post => {
+                    const currentSector = post.section || "news";
+                    return currentSector === sectorId;
+                });
 
             if (displayedPosts.length === 0) {
                 newsContainer.innerHTML = '<p class="no-news">В этом разделе публикаций пока нет.</p>';
@@ -195,7 +211,6 @@
             newsContainer.innerHTML = "";
             displayedPosts.forEach(post => {
                 const card = document.createElement("div");
-                // Добавляем встроенные стили для аккуратного скрытия текста (аккордеона)
                 card.className = "news-card";
                 card.style.background = "#1e293b";
                 card.style.borderRadius = "12px";
@@ -205,25 +220,26 @@
                 card.style.cursor = "pointer";
 
                 const imgHtml = post.img ? `<img src="${post.img}" alt="${post.title}" class="news-img" style="width:100%; max-height:300px; object-fit:cover; display:block;">` : "";
-                const currentSectorName = SECTOR_TRANSLATIONS[post.section] || "Общий раздел";
+                const currentSectorName = SECTOR_TRANSLATIONS[post.section] || "Новости";
 
-                // Шапочка видна всегда, а тело (news-body) изначально имеет высоту 0px
                 card.innerHTML = `
                     <div class="news-header" style="padding: 1.5rem; user-select: none;">
-                        <h3 style="color:#fff; margin:0 0 0.5rem 0; font-size:1.25rem;">${post.title}</h3>
+                        <h3 style="color:#fff; margin:0 0 0.5rem 0; font-size:1.25rem;">${post.title || 'Без заголовка'}</h3>
                         <span style="font-size:0.8rem; color:#64748b;">${post.date || ''} | Раздел: ${currentSectorName}</span>
-                        <span class="arrow-indicator" style="float:right; color:#2563eb; transition: transform 0.3s;">▼ Читать</span>
+                        <span class="arrow-indicator" style="float:right; color:#2563eb; transition: transform 0.3s; font-weight:600;">▼ Читать</span>
                     </div>
                     <div class="news-body" style="max-height: 0px; overflow: hidden; transition: max-height 0.3s ease-out; background:#131c2e;">
                         <div style="padding: 1.5rem; color:#cbd5e1; line-height:1.6; white-space:pre-wrap;">
-                            ${post.text}
+                            ${post.text || ''}
                             ${imgHtml}
                         </div>
                     </div>
                 `;
 
-                // Логика раскрытия аккордеона по клику на карточку новостей
                 card.addEventListener("click", function(e) {
+                    // Исключаем срабатывание клика, если пользователь выделил текст новости
+                    if (window.getSelection().toString()) return;
+
                     const body = this.querySelector(".news-body");
                     const arrow = this.querySelector(".arrow-indicator");
                     
@@ -242,7 +258,6 @@
             });
         }
 
-        // Переключение меню при клике на сектора
         function filterNewsBySector(sectorId) {
             const titleElement = document.getElementById("news-section-title");
             const resetBtn = document.getElementById("reset-news-filter");
@@ -250,7 +265,6 @@
             if (sectorId === "all") {
                 titleElement.innerText = "Последние новости";
                 resetBtn.style.display = "none";
-                // Сбрасываем подсветку с карточек секторов вверху страницы
                 document.querySelectorAll(".sector-card").forEach(c => c.style.background = "");
             } else {
                 const sectorName = SECTOR_TRANSLATIONS[sectorId] || "Раздел";
@@ -258,10 +272,8 @@
                 resetBtn.style.display = "inline-block";
             }
 
-            // Перерисовываем карточки
             renderFilteredNews(sectorId);
 
-            // Плавно скроллим пользователя вниз к началу новостной ленты
             document.getElementById("news").scrollIntoView({ behavior: "smooth", block: "start" });
         }
 
