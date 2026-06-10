@@ -83,17 +83,15 @@
         <!-- ОТСТУП МЕЖДУ РАЗДЕЛАМИ -->
         <div style="height: 120px; width: 100%;"></div>
 
-                <!-- СЕКЦИЯ: НОВОСТИ С ИНТЕРАКТИВНЫМ МЕНЮ СЕКТОРОВ -->
-        <section id="news" class="news-section" style="scroll-margin-top: 2rem;">
-            <!-- Динамический заголовок, который меняется при выборе сектора -->
+                       <!-- СЕКЦИЯ: НОВОСТИ -->
+        <section id="news" class="news-section" style="scroll-margin-top: 2rem; padding: 2rem 1rem; max-width: 1200px; margin: 0 auto;">
             <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #334155; padding-bottom: 0.75rem; margin-bottom: 2rem; flex-wrap: wrap; gap: 1rem;">
-                <h2 id="news-section-title" style="margin: 0;">Последние новости</h2>
+                <h2 id="news-section-title" style="margin: 0; color: #fff; font-size: 2rem; font-weight: 800;">Последние новости</h2>
                 <button id="reset-news-filter" onclick="filterNewsBySector('all')" style="display: none; background: #334155; color: #cbd5e1; border: none; padding: 0.5rem 1rem; border-radius: 6px; font-size: 0.9rem; font-weight: 600; cursor: pointer; transition: background 0.2s;">Показать все новости</button>
             </div>
             
-            <!-- Сюда скрипт будет выводить карточки новостей -->
-            <div id="news-container" class="news-grid">
-                <p class="no-news">Загрузка новостей...</p>
+            <div id="news-container">
+                <p class="no-news" style="text-align: center; color: #64748b; padding: 2rem 0;">Загрузка новостей...</p>
             </div>
         </section>
 
@@ -115,17 +113,16 @@
     <footer>
         <p>&copy; 2026 Молодёжный Совет ГГКЖТ. Все права защищены.</p>
     </footer>
-           <script>
+    <script>
         const DATABASE_URL = "https://firebaseio.com";
         let localPostsStorage = []; 
 
-        // ИСПРАВЛЕНО: Строгое соответствие порядка секторов вашей HTML-разметке
         const SECTOR_IDS_MAP = [
-            "sector-legal",     // 1. Правовой
-            "sector-culture",   // 2. Культурный
-            "sector-sport",     // 3. Спортивный
-            "sector-info",      // 4. Информационный
-            "sector-household"  // 5. Бытовой
+            "sector-legal",     
+            "sector-culture",   
+            "sector-sport",     
+            "sector-info",      
+            "sector-household"  
         ];
 
         const SECTOR_TRANSLATIONS = {
@@ -142,10 +139,8 @@
             loadGlobalNews();
         });
 
-        // Шаг 1: Привязка кликов к карточкам
         function setupSectorCardsClicks() {
             const cards = document.querySelectorAll(".sector-card");
-            
             cards.forEach((card, index) => {
                 const targetSector = SECTOR_IDS_MAP[index];
                 if (targetSector) {
@@ -159,52 +154,37 @@
             });
         }
 
-        // Шаг 2: Безопасная загрузка новостей
         async function loadGlobalNews() {
             const newsContainer = document.getElementById("news-container");
             try {
                 const res = await fetch(`${DATABASE_URL}/posts.json`);
-                
-                if (!res.ok) {
-                    throw new Error(`Ошибка сервера: ${res.status}`);
-                }
-                
                 const data = await res.json();
                 
                 if (!data || Object.keys(data).length === 0) {
-                    newsContainer.innerHTML = '<p class="no-news">Пока новостей нет. Зайдите позже!</p>';
+                    newsContainer.innerHTML = '<p class="no-news" style="text-align: center; color: #64748b; padding: 2rem 0;">Пока новостей нет. Зайдите позже!</p>';
                     return;
                 }
 
-                // ИСПРАВЛЕНО: Защита от пустых или битых записей в базе данных
-                localPostsStorage = Object.keys(data)
-                    .map(key => ({ firebaseKey: key, ...data[key] }))
-                    .filter(post => post && (post.title || post.text))
-                    .reverse();
-
+                // Читаем корневые объекты по их ID
+                localPostsStorage = Object.keys(data).map(key => data[key]).reverse();
                 renderFilteredNews("all");
 
             } catch (err) {
-                console.error("Критическая ошибка Firebase:", err);
-                newsContainer.innerHTML = '<p class="no-news">Ошибка загрузки данных. Попробуйте позже!</p>';
+                console.error("Ошибка Firebase:", err);
+                newsContainer.innerHTML = '<p class="no-news" style="text-align: center; color: #ef4444; padding: 2rem 0;">Ошибка загрузки данных. Попробуйте позже!</p>';
             }
         }
 
-        // Шаг 3: Отрисовка карточек с автоматической поддержкой старых новостей
         function renderFilteredNews(sectorId) {
             const newsContainer = document.getElementById("news-container");
             if (!newsContainer) return;
 
-            // ИСПРАВЛЕНО: Старые новости без указанного сектора теперь автоматически относятся к категории "news"
             const displayedPosts = sectorId === "all" 
                 ? localPostsStorage 
-                : localPostsStorage.filter(post => {
-                    const currentSector = post.section || "news";
-                    return currentSector === sectorId;
-                });
+                : localPostsStorage.filter(post => (post.section || "news") === sectorId);
 
             if (displayedPosts.length === 0) {
-                newsContainer.innerHTML = '<p class="no-news">В этом разделе публикаций пока нет.</p>';
+                newsContainer.innerHTML = '<p class="no-news" style="text-align: center; color: #64748b; padding: 2rem 0;">В этом разделе публикаций пока нет.</p>';
                 return;
             }
 
@@ -219,37 +199,35 @@
                 card.style.border = "1px solid rgba(255,255,255,0.05)";
                 card.style.cursor = "pointer";
 
-                const imgHtml = post.img ? `<img src="${post.img}" alt="${post.title}" class="news-img" style="width:100%; max-height:300px; object-fit:cover; display:block;">` : "";
+                const imgHtml = post.img ? `<img src="${post.img}" class="news-img" style="width:100%; max-height:350px; object-fit:cover; display:block;">` : "";
                 const currentSectorName = SECTOR_TRANSLATIONS[post.section] || "Новости";
 
                 card.innerHTML = `
-                    <div class="news-header" style="padding: 1.5rem; user-select: none;">
-                        <h3 style="color:#fff; margin:0 0 0.5rem 0; font-size:1.25rem;">${post.title || 'Без заголовка'}</h3>
-                        <span style="font-size:0.8rem; color:#64748b;">${post.date || ''} | Раздел: ${currentSectorName}</span>
-                        <span class="arrow-indicator" style="float:right; color:#2563eb; transition: transform 0.3s; font-weight:600;">▼ Читать</span>
+                    <div class="news-header" style="padding: 1.5rem; user-select: none; display: flex; justify-content: space-between; align-items: center;">
+                        <div>
+                            <h3 style="color:#fff; margin:0 0 0.5rem 0; font-size:1.3rem; font-weight: 700;">${post.title || 'Без заголовка'}</h3>
+                            <span style="font-size:0.85rem; color:#64748b;">${post.date || ''} | Раздел: ${currentSectorName}</span>
+                        </div>
+                        <span class="arrow-indicator" style="color:#2563eb; font-weight:600; font-size: 0.9rem;">▼ Читать</span>
                     </div>
                     <div class="news-body" style="max-height: 0px; overflow: hidden; transition: max-height 0.3s ease-out; background:#131c2e;">
-                        <div style="padding: 1.5rem; color:#cbd5e1; line-height:1.6; white-space:pre-wrap;">
-                            ${post.text || ''}
+                        <div style="padding: 1.5rem; color:#cbd5e1; line-height:1.6; font-size: 1rem; white-space:pre-wrap;">
+                            <p style="margin-bottom: 1rem;">${post.text || ''}</p>
                             ${imgHtml}
                         </div>
                     </div>
                 `;
 
-                card.addEventListener("click", function(e) {
-                    // Исключаем срабатывание клика, если пользователь выделил текст новости
+                card.addEventListener("click", function() {
                     if (window.getSelection().toString()) return;
-
                     const body = this.querySelector(".news-body");
                     const arrow = this.querySelector(".arrow-indicator");
                     
                     if (body.style.maxHeight === "0px" || !body.style.maxHeight) {
                         body.style.maxHeight = body.scrollHeight + "px";
-                        arrow.style.transform = "rotate(180deg)";
                         arrow.innerText = "▲ Свернуть";
                     } else {
                         body.style.maxHeight = "0px";
-                        arrow.style.transform = "rotate(0deg)";
                         arrow.innerText = "▼ Читать";
                     }
                 });
@@ -267,17 +245,14 @@
                 resetBtn.style.display = "none";
                 document.querySelectorAll(".sector-card").forEach(c => c.style.background = "");
             } else {
-                const sectorName = SECTOR_TRANSLATIONS[sectorId] || "Раздел";
-                titleElement.innerText = `Новости: ${sectorName}`;
+                titleElement.innerText = `Новости: ${SECTOR_TRANSLATIONS[sectorId] || 'Раздел'}`;
                 resetBtn.style.display = "inline-block";
             }
 
             renderFilteredNews(sectorId);
-
             document.getElementById("news").scrollIntoView({ behavior: "smooth", block: "start" });
         }
 
-        // СЕКРЕТНЫЙ ВЫЗОВ АДМИНКИ НА КЛАВИШУ Ё (~)
         document.addEventListener("keydown", (e) => {
             if (e.key === "ё" || e.key === "Ё" || e.key === "`" || e.key === "~") {
                 window.location.href = "admin.html";
